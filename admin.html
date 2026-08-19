@@ -810,7 +810,8 @@
 
         try {
             // หากยังไม่ได้ตั้ง URL ลองเช็คว่าล็อกอินด้วย default credentials ได้หรือไม่
-            if (!CONFIG.getApiUrl() && username === 'admin' && password === 'admin123') {
+            const curApiUrl = typeof CONFIG !== 'undefined' ? CONFIG.getApiUrl() : (localStorage.getItem("app_portal_gas_url") || "");
+            if (!curApiUrl && username === 'admin' && password === 'admin123') {
                 localStorage.setItem('admin_auth_token', 'demo_token_' + Date.now());
                 localStorage.setItem('admin_auth_user', JSON.stringify({ id: 1, username: 'admin', role: 'superadmin' }));
                 API.toast("เข้าสู่ระบบสำเร็จ (โหมดสาธิต)", "success");
@@ -1349,7 +1350,7 @@
     // 8. SETTINGS MANAGEMENT
     // ------------------------------------------------------------------------
     async function loadAdminSettingsData() {
-        document.getElementById('settingGasApiUrl').value = CONFIG.getApiUrl();
+        document.getElementById('settingGasApiUrl').value = typeof CONFIG !== 'undefined' ? CONFIG.getApiUrl() : (localStorage.getItem("app_portal_gas_url") || "");
         const data = await API.getInitialData(true);
         if (data && data.settings) {
             const s = data.settings;

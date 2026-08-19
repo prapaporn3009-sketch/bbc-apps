@@ -9,7 +9,7 @@
 const API = {
   // ฟังก์ชันส่งคำขอ GET ไปยัง Google Apps Script
   async get(action, params = {}) {
-    const apiUrl = CONFIG.getApiUrl();
+    const apiUrl = typeof CONFIG !== 'undefined' ? CONFIG.getApiUrl() : (localStorage.getItem("app_portal_gas_url") || "");
     if (!apiUrl) {
       console.warn("⚠️ ยังไม่ได้กำหนด Google Apps Script API URL, ใช้งานข้อมูลจำลอง (Fallback)");
       return null;
@@ -36,7 +36,7 @@ const API = {
 
   // ฟังก์ชันส่งคำขอ POST ไปยัง Google Apps Script
   async post(action, payload = {}) {
-    const apiUrl = CONFIG.getApiUrl();
+    const apiUrl = typeof CONFIG !== 'undefined' ? CONFIG.getApiUrl() : (localStorage.getItem("app_portal_gas_url") || "");
     if (!apiUrl) {
       throw new Error("กรุณาตั้งค่า Google Apps Script API URL ก่อนทำรายการ");
     }
