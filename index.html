@@ -1142,6 +1142,7 @@
     };
 
     function updateApiStatusBadge() {
+        if (typeof CONFIG === 'undefined') return;
         const apiUrl = CONFIG.getApiUrl();
         const btn = document.getElementById('apiStatusBtn');
         const text = document.getElementById('apiStatusText');
@@ -1157,7 +1158,9 @@
     }
 
     window.openApiConfigModal = function() {
-        document.getElementById('modalApiUrlInput').value = CONFIG.getApiUrl();
+        if (typeof CONFIG !== 'undefined') {
+            document.getElementById('modalApiUrlInput').value = CONFIG.getApiUrl();
+        }
         document.getElementById('apiConfigModal').style.display = 'flex';
     };
 

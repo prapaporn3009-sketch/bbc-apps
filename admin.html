@@ -872,15 +872,18 @@
     }
 
     function updateAdminApiBadge() {
+        if (typeof CONFIG === 'undefined') return;
         const url = CONFIG.getApiUrl();
         const badge = document.getElementById('adminApiStatusBadge');
         const text = document.getElementById('adminApiStatusText');
-        if (url) {
-            badge.className = 'api-config-badge connected';
-            text.innerText = 'GAS Connected';
-        } else {
-            badge.className = 'api-config-badge fallback';
-            text.innerText = 'Set GAS URL';
+        if (badge && text) {
+            if (url) {
+                badge.className = 'api-config-badge connected';
+                text.innerText = 'GAS Connected';
+            } else {
+                badge.className = 'api-config-badge fallback';
+                text.innerText = 'Set GAS URL';
+            }
         }
     }
 

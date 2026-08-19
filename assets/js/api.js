@@ -106,7 +106,7 @@ const API = {
       console.warn("ไม่สามารถติดต่อ API ได้ ใช้ข้อมูลจาก Cache หรือ Default:", err);
     }
 
-    // หากติดต่อ API ไม่ได้ ให้ใช้ Cache ล่าสุดหรือ Default Mock Data
+    // หากติดต่อ API ไม่ได้ ให้ใช้ Cache ล่าสุด (ถ้ามี)
     const cached = localStorage.getItem("app_portal_cache_initial");
     if (cached) {
       try {
@@ -114,7 +114,13 @@ const API = {
       } catch (e) {}
     }
 
-    return CONFIG.DEFAULT_DATA;
+    return {
+      settings: {},
+      categories: [],
+      apps: [],
+      news: [],
+      calendar: []
+    };
   },
 
   async fetchInitialDataBackground() {
