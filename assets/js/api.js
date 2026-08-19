@@ -21,7 +21,7 @@ const API = {
     try {
       const response = await fetch(fullUrl, {
         method: "GET",
-        headers: { "Accept": "application/json" }
+        redirect: "follow"
       });
       if (!response.ok) {
         throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
