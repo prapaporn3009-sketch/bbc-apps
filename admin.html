@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการข้อมูล (Admin Portal) - ศูนย์รวมบริการดิจิทัล</title>
+    
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="sidebar-open">
+
+<!-- ======================================================================== -->
+<!-- 1. LOGIN SCREEN -->
+<!-- ======================================================================== -->
+<div id="loginView" style="display: none; min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); align-items: center; justify-content: center; padding: 20px; font-family: 'Prompt', sans-serif;">
+    <div style="background: rgba(255, 255, 255, 0.98); border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); animation: slideDown 0.4s ease;">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div style="width: 64px; height: 64px; background: #eef2ff; color: #4f46e5; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">เข้าสู่ระบบจัดการ</h2>
+            <p style="font-size: 13px; color: #64748b;">Admin Portal • Google Sheets & Drive API</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">ชื่อผู้ใช้งาน (Username):</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-user" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px;"></i>
+                    <input type="text" id="loginUsername" required placeholder="admin" value="admin" style="width: 100%; padding: 12px 14px 12px 40px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box; font-family: 'Prompt', sans-serif;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">รหัสผ่าน (Password):</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-lock" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px;"></i>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" value="admin123" style="width: 100%; padding: 12px 14px 12px 40px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box; font-family: 'Prompt', sans-serif;">
+                </div>
+            </div>
+
+            <button type="submit" id="btnLoginSubmit" style="width: 100%; background: linear-gradient(135deg, #4f46e5, #4338ca); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35); transition: all 0.2s; font-family: 'Prompt', sans-serif;">
+                เข้าสู่ระบบ
+            </button>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="index.html" style="font-size: 13px; color: #64748b; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-left"></i> กลับไปยังหน้าเว็บหลัก
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================================== -->
+<!-- 2. ADMIN DASHBOARD & SPA MANAGEMENT WORKSPACE -->
+<!-- ======================================================================== -->
+<div id="adminAppView" style="display: none; min-height: 100vh; flex-direction: column;">
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-brand">
+                <i class="fa-solid fa-cubes"></i>
+                <span>Admin Panel</span>
+            </a>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button>
+        </div>
+
+        <nav class="sidebar-menu">
+            <a href="#" onclick="switchAdminTab('dashboard'); return false;" class="sidebar-link active" id="side-nav-dashboard">
+                <i class="fa-solid fa-chart-pie"></i> <span>แดชบอร์ดภาพรวม</span>
+            </a>
+            <a href="#" onclick="switchAdminTab('apps'); return false;" class="sidebar-link" id="side-nav-apps">
+                <i class="fa-solid fa-grid-2"></i> <span>จัดการแอปและบริการ</span>
+            </a>
+            <a href="#" onclick="switchAdminTab('categories'); return false;" class="sidebar-link" id="side-nav-categories">
+                <i class="fa-solid fa-folder-tree"></i> <span>จัดการหมวดหมู่</span>
+            </a>
+            <a href="#" onclick="switchAdminTab('news'); return false;" class="sidebar-link" id="side-nav-news">
+                <i class="fa-regular fa-newspaper"></i> <span>ข่าวสารและประกาศ</span>
+            </a>
+            <a href="#" onclick="switchAdminTab('calendar'); return false;" class="sidebar-link" id="side-nav-calendar">
+                <i class="fa-regular fa-calendar-days"></i> <span>ปฏิทินวิชาการ</span>
+            </a>
+            <a href="#" onclick="switchAdminTab('settings'); return false;" class="sidebar-link" id="side-nav-settings">
+                <i class="fa-solid fa-sliders"></i> <span>ตั้งค่าระบบ</span>
+            </a>
+            <a href="#" onclick="switchAdminTab('admins'); return false;" class="sidebar-link" id="side-nav-admins">
+                <i class="fa-solid fa-users-gear"></i> <span>ผู้ดูแลระบบ</span>
+            </a>
+            <a href="#" onclick="switchAdminTab('logs'); return false;" class="sidebar-link" id="side-nav-logs">
+                <i class="fa-solid fa-clock-rotate-left"></i> <span>ประวัติการทำงาน (Logs)</span>
+            </a>
+
+            <a href="#" onclick="handleLogout(); return false;" class="sidebar-link sidebar-link-logout">
+                <i class="fa-solid fa-right-from-bracket"></i> <span>ออกจากระบบ</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Top Navigation Bar -->
+    <header class="admin-nav">
+        <div class="nav-container">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <button onclick="toggleSidebar()" class="btn" style="background: none; border: none; font-size: 18px; color: var(--text); cursor: pointer; padding: 6px;">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <a href="index.html" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> ดูหน้าเว็บจริง
+                </a>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div id="adminApiStatusBadge" class="api-config-badge fallback" style="cursor: pointer;" onclick="switchAdminTab('settings')">
+                    <i class="fa-solid fa-cloud"></i> <span id="adminApiStatusText">API Status</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text);">
+                    <i class="fa-solid fa-circle-user" style="font-size: 20px; color: var(--primary);"></i>
+                    <span id="currentAdminUsername">admin</span>
+                </div>
+                <button onclick="handleLogout()" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">
+                    <i class="fa-solid fa-right-from-bracket"></i> ออก
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="admin-container">
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- TAB 1: DASHBOARD -->
+        <!-- ------------------------------------------------------------------ -->
+        <div id="admin-tab-dashboard" class="admin-tab-pane active">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ดภาพรวมระบบ</h1>
+                <button onclick="loadAdminDashboardData(true)" class="btn btn-secondary"><i class="fa-solid fa-rotate-right"></i> รีเฟรชข้อมูล</button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-value" id="statAppsCount">0</span>
+                        <span class="stat-label">แอปพลิเคชันและบริการ</span>
+                    </div>
+                    <div class="stat-icon primary"><i class="fa-solid fa-cubes"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-value" id="statCategoriesCount">0</span>
+                        <span class="stat-label">หมวดหมู่บริการ</span>
+                    </div>
+                    <div class="stat-icon success"><i class="fa-solid fa-folder-tree"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-value" id="statNewsCount">0</span>
+                        <span class="stat-label">ข่าวสารประชาสัมพันธ์</span>
+                    </div>
+                    <div class="stat-icon warning"><i class="fa-regular fa-newspaper"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-value" id="statCalendarCount">0</span>
+                        <span class="stat-label">กิจกรรมในปฏิทิน</span>
+                    </div>
+                    <div class="stat-icon info"><i class="fa-regular fa-calendar-days"></i></div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Panel -->
+            <div class="panel">
+                <div class="panel-header" style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: var(--text); margin: 0;"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติการทำงานล่าสุด</h3>
+                    <a href="#" onclick="switchAdminTab('logs'); return false;" style="font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 600;">ดูทั้งหมด</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">ID</th>
+                                <th style="width: 140px;">ผู้ดำเนินการ</th>
+                                <th>กิจกรรม</th>
+                                <th style="width: 180px;">เวลา</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardRecentLogsTbody">
+                            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- TAB 2: APPS MANAGEMENT -->
+        <!-- ------------------------------------------------------------------ -->
+        <div id="admin-tab-apps" class="admin-tab-pane">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fa-solid fa-grid-2"></i> จัดการแอปพลิเคชันและบริการ</h1>
+                <button onclick="openAppModal()" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มแอปใหม่</button>
+            </div>
+
+            <div class="panel">
+                <div class="table-toolbar" style="padding: 16px 20px 0;">
+                    <div class="table-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="adminAppsSearch" placeholder="ค้นหาชื่อบริการ..." oninput="filterAdminAppsTable()">
+                    </div>
+                    <div>
+                        <select id="adminAppsCategoryFilter" onchange="filterAdminAppsTable()" class="form-control" style="width: auto; display: inline-block;">
+                            <option value="all">ทุกหมวดหมู่</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">ลำดับ</th>
+                                <th style="width: 60px;">ไอคอน</th>
+                                <th>ชื่อบริการ / รายละเอียด</th>
+                                <th>หมวดหมู่</th>
+                                <th>การเปิดลิงก์</th>
+                                <th>รายการโปรด</th>
+                                <th style="width: 130px; text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminAppsTbody">
+                            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">กำลังโหลดรายการแอปพลิเคชัน...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- TAB 3: CATEGORIES MANAGEMENT -->
+        <!-- ------------------------------------------------------------------ -->
+        <div id="admin-tab-categories" class="admin-tab-pane">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fa-solid fa-folder-tree"></i> จัดการหมวดหมู่บริการ</h1>
+                <button onclick="openCategoryModal()" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มหมวดหมู่ใหม่</button>
+            </div>
+
+            <div class="panel">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th>ชื่อหมวดหมู่</th>
+                                <th>จำนวนบริการในหมวดหมู่นี้</th>
+                                <th style="width: 140px; text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminCategoriesTbody">
+                            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">กำลังโหลดหมวดหมู่...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- TAB 4: NEWS MANAGEMENT -->
+        <!-- ------------------------------------------------------------------ -->
+        <div id="admin-tab-news" class="admin-tab-pane">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fa-regular fa-newspaper"></i> จัดการข่าวสารและประกาศ</h1>
+                <button onclick="openNewsModal()" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มข่าวใหม่</button>
+            </div>
+
+            <div class="panel">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">ลำดับ</th>
+                                <th style="width: 80px;">ภาพข่าว</th>
+                                <th>หัวข้อข่าว / ประกาศ</th>
+                                <th>วันที่ลงข่าว</th>
+                                <th style="width: 140px; text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminNewsTbody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">กำลังโหลดข่าวสาร...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- TAB 5: CALENDAR MANAGEMENT -->
+        <!-- ------------------------------------------------------------------ -->
+        <div id="admin-tab-calendar" class="admin-tab-pane">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fa-regular fa-calendar-days"></i> จัดการปฏิทินวิชาการและกิจกรรม</h1>
+                <button onclick="openCalendarModal()" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มกิจกรรมใหม่</button>
+            </div>
+
+            <div class="panel">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 130px;">วันที่กิจกรรม</th>
+                                <th style="width: 120px;">เวลา</th>
+                                <th>ชื่อกิจกรรม / กำหนดการ</th>
+                                <th>รายละเอียด</th>
+                                <th style="width: 140px; text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminCalendarTbody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">กำลังโหลดกิจกรรม...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- TAB 6: SETTINGS MANAGEMENT -->
+        <!-- ------------------------------------------------------------------ -->
+        <div id="admin-tab-settings" class="admin-tab-pane">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fa-solid fa-sliders"></i> ตั้งค่าระบบและการเชื่อมต่อ</h1>
+                <button onclick="saveAllSettings()" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> บันทึกการตั้งค่าทั้งหมด</button>
+            </div>
+
+            <!-- API Connection Settings Card -->
+            <div class="panel" style="margin-bottom: 24px; border-left: 4px solid var(--primary);">
+                <div style="padding: 20px;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text);">
+                        <i class="fa-solid fa-cloud" style="color: var(--primary);"></i> การเชื่อมต่อ Google Apps Script Web App API
+                    </h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                        นำ Web App URL ที่ได้จากการ Deploy ใน Google Apps Script มาบันทึกไว้ที่นี่
+                    </p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="url" id="settingGasApiUrl" placeholder="https://script.google.com/macros/s/.../exec" style="flex: 1; min-width: 280px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; outline: none;">
+                        <button onclick="testAndSaveGasUrl()" class="btn btn-success"><i class="fa-solid fa-plug"></i> ทดสอบและเชื่อมต่อ</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Info & Branding -->
+            <div class="panel" style="margin-bottom: 24px;">
+                <div style="padding: 20px;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <i class="fa-solid fa-globe"></i> ข้อมูลพื้นฐานและโลโก้ระบบ
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">ชื่อระบบ / ชื่อหน่วยงาน:</label>
+                            <input type="text" id="settingSystemName" class="form-control" placeholder="ศูนย์รวมบริการดิจิทัล">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ข้อความท้ายเว็บ (Footer Text):</label>
+                            <input type="text" id="settingSystemFooter" class="form-control" placeholder="พัฒนาด้วยความใส่ใจ • รวดเร็ว ปลอดภัย และเสถียร">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">โลโก้และไอคอนระบบ (System Logo / Shortcut Icon):</label>
+                        <div class="upload-dropzone" onclick="document.getElementById('settingIconInput').click()">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 28px; color: var(--primary); margin-bottom: 6px;"></i>
+                            <div style="font-size: 13px; font-weight: 600;">คลิกเพื่อเลือกรูปภาพ หรือ ลากไฟล์มาวาง</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">รองรับไฟล์ PNG, JPG, WebP, SVG (อัปโหลดเข้า Google Drive อัตโนมัติ)</div>
+                        </div>
+                        <input type="file" id="settingIconInput" accept="image/*" style="display: none;" onchange="handleImagePreview(this, 'settingIconPreview', 'settingIconPreviewImg')">
+                        <div id="settingIconPreview" class="upload-preview-box" style="display: none;">
+                            <img id="settingIconPreviewImg" class="upload-preview-img" src="" alt="">
+                            <div>
+                                <div style="font-size: 13px; font-weight: 600;">รูปภาพไอคอนระบบปัจจุบัน</div>
+                                <div style="font-size: 11px; color: var(--text-muted);">บันทึกการตั้งค่าเพื่ออัปโหลดขึ้น Google Drive</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marquee Announcement Settings -->
+            <div class="panel" style="margin-bottom: 24px;">
+                <div style="padding: 20px;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <i class="fa-solid fa-bullhorn"></i> แถบข้อความวิ่งประชาสัมพันธ์ (Marquee Banner)
+                    </h3>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                            <input type="checkbox" id="settingMarqueeEnabled" style="width: 18px; height: 18px;">
+                            <span>เปิดใช้งานแถบข้อความวิ่ง</span>
+                        </label>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">ข้อความประกาศ:</label>
+                            <input type="text" id="settingMarqueeText" class="form-control" placeholder="ยินดีต้อนรับเข้าสู่ระบบบริการดิจิทัล...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">โทนสีแถบข้อความ:</label>
+                            <select id="settingMarqueeColor" class="form-control">
+                                <option value="danger">สีแดง (Danger)</option>
+                                <option value="info">สีน้ำเงิน (Info)</option>
+                                <option value="success">สีเขียว (Success)</option>
+                                <option value="warning">สีเหลือง/ส้ม (Warning)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Popup Settings -->
+            <div class="panel" style="margin-bottom: 24px;">
+                <div style="padding: 20px;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <i class="fa-solid fa-window-maximize"></i> ป๊อปอัปประกาศหน้าแรก (Welcome Popup Announcement)
+                    </h3>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                            <input type="checkbox" id="settingPopupEnabled" style="width: 18px; height: 18px;">
+                            <span>เปิดใช้งานป๊อปอัปแจ้งเตือนเมื่อเปิดหน้าแรก</span>
+                        </label>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 16px;">
+                        <div class="form-group">
+                            <label class="form-label">หัวข้อป๊อปอัป:</label>
+                            <input type="text" id="settingPopupTitle" class="form-control" placeholder="ประกาศสำคัญ">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ลิงก์เพิ่มเติม (ถ้ามี):</label>
+                            <input type="url" id="settingPopupLink" class="form-control" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label">เนื้อหาประกาศ:</label>
+                        <textarea id="settingPopupContent" class="form-control" rows="3" placeholder="ระบุข้อความประกาศ..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">รูปภาพประกอบป๊อปอัป:</label>
+                        <div class="upload-dropzone" onclick="document.getElementById('settingPopupImgInput').click()">
+                            <i class="fa-solid fa-image" style="font-size: 24px; color: var(--primary); margin-bottom: 4px;"></i>
+                            <div style="font-size: 13px; font-weight: 600;">คลิกเพื่ออัปโหลดรูปภาพป๊อปอัป</div>
+                        </div>
+                        <input type="file" id="settingPopupImgInput" accept="image/*" style="display: none;" onchange="handleImagePreview(this, 'settingPopupImgPreview', 'settingPopupImgPreviewTag')">
+                        <div id="settingPopupImgPreview" class="upload-preview-box" style="display: none;">
+                            <img id="settingPopupImgPreviewTag" class="upload-preview-img" src="" alt="">
+                            <div><div style="font-size: 13px; font-weight: 600;">รูปภาพป๊อปอัป</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- TAB 7: ADMIN USERS -->
+        <!-- ------------------------------------------------------------------ -->
+        <div id="admin-tab-admins" class="admin-tab-pane">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fa-solid fa-users-gear"></i> จัดการผู้ดูแลระบบ</h1>
+                <button onclick="openAdminUserModal()" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มผู้ดูแลระบบใหม่</button>
+            </div>
+
+            <div class="panel">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th>ชื่อผู้ใช้งาน (Username)</th>
+                                <th>บทบาท (Role)</th>
+                                <th>วันที่สร้าง</th>
+                                <th style="width: 140px; text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTbody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">กำลังโหลดรายชื่อผู้ดูแลระบบ...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- TAB 8: LOGS -->
+        <!-- ------------------------------------------------------------------ -->
+        <div id="admin-tab-logs" class="admin-tab-pane">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติการทำงานในระบบ (Logs)</h1>
+                <button onclick="loadAdminLogsData()" class="btn btn-secondary"><i class="fa-solid fa-rotate-right"></i> รีเฟรช</button>
+            </div>
+
+            <div class="panel">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">ID</th>
+                                <th style="width: 140px;">ผู้ใช้งาน</th>
+                                <th>กิจกรรม</th>
+                                <th style="width: 120px;">IP / Source</th>
+                                <th style="width: 180px;">เวลา</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminFullLogsTbody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">กำลังโหลดประวัติการทำงาน...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ======================================================================== -->
+<!-- MODALS -->
+<!-- ======================================================================== -->
+
+<!-- App Modal (Add/Edit) -->
+<div id="appModal" class="admin-modal-overlay">
+    <div class="admin-modal-dialog">
+        <div class="admin-modal-header">
+            <h3 id="appModalTitle" class="admin-modal-title"><i class="fa-solid fa-cubes"></i> เพิ่มแอปพลิเคชันใหม่</h3>
+            <button onclick="closeAppModal()" class="admin-modal-close">&times;</button>
+        </div>
+        <form id="appForm" onsubmit="handleAppFormSubmit(event)">
+            <input type="hidden" id="appFormId">
+            <input type="hidden" id="appFormExistingIcon">
+            <div class="admin-modal-body">
+                <div class="form-group">
+                    <label class="form-label">ชื่อแอป / บริการ: *</label>
+                    <input type="text" id="appFormName" required class="form-control" placeholder="เช่น ระบบสารบรรณอิเล็กทรอนิกส์">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">รายละเอียดโดยย่อ:</label>
+                    <input type="text" id="appFormDesc" class="form-control" placeholder="เช่น จัดการเอกสารและหนังสือเวียนราชการ">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">ลิงก์ URL ปลายทาง: *</label>
+                    <input type="url" id="appFormUrl" required class="form-control" placeholder="https://...">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">หมวดหมู่บริการ:</label>
+                        <select id="appFormCategory" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ลำดับการแสดงผล (Sort Order):</label>
+                        <input type="number" id="appFormSort" class="form-control" value="0">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">รูปแบบการเปิดลิงก์:</label>
+                        <select id="appFormOpenMode" class="form-control">
+                            <option value="new_tab">เปิดแท็บใหม่ (New Tab - แนะนำ)</option>
+                            <option value="iframe">เปิดในระบบ (In-App Modal / Iframe)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; margin-top: 24px;">
+                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            <input type="checkbox" id="appFormIsFavorite" style="width: 16px; height: 16px;">
+                            <span>ปักหมุดเป็นบริการแนะนำ</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">ไอคอนแอป (อัปโหลดเข้า Google Drive):</label>
+                    <div class="upload-dropzone" onclick="document.getElementById('appFormIconFile').click()">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: var(--primary); margin-bottom: 4px;"></i>
+                        <div style="font-size: 13px; font-weight: 600;">คลิกเพื่อเลือกไฟล์รูปภาพไอคอน</div>
+                    </div>
+                    <input type="file" id="appFormIconFile" accept="image/*" style="display: none;" onchange="handleImagePreview(this, 'appIconPreviewBox', 'appIconPreviewImgTag')">
+                    <div id="appIconPreviewBox" class="upload-preview-box" style="display: none;">
+                        <img id="appIconPreviewImgTag" class="upload-preview-img" src="" alt="">
+                        <div><div style="font-size: 13px; font-weight: 600;">ตัวอย่างไอคอน</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" onclick="closeAppModal()" class="btn btn-secondary">ยกเลิก</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูล</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Category Modal (Add/Edit) -->
+<div id="categoryModal" class="admin-modal-overlay">
+    <div class="admin-modal-dialog" style="max-width: 440px;">
+        <div class="admin-modal-header">
+            <h3 id="categoryModalTitle" class="admin-modal-title"><i class="fa-solid fa-folder-tree"></i> จัดการหมวดหมู่</h3>
+            <button onclick="closeCategoryModal()" class="admin-modal-close">&times;</button>
+        </div>
+        <form id="categoryForm" onsubmit="handleCategoryFormSubmit(event)">
+            <input type="hidden" id="categoryFormId">
+            <div class="admin-modal-body">
+                <div class="form-group">
+                    <label class="form-label">ชื่อหมวดหมู่: *</label>
+                    <input type="text" id="categoryFormName" required class="form-control" placeholder="เช่น บริการภายใน">
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" onclick="closeCategoryModal()" class="btn btn-secondary">ยกเลิก</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> บันทึก</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- News Modal (Add/Edit) -->
+<div id="newsModal" class="admin-modal-overlay">
+    <div class="admin-modal-dialog">
+        <div class="admin-modal-header">
+            <h3 id="newsModalTitle" class="admin-modal-title"><i class="fa-regular fa-newspaper"></i> จัดการข่าวสาร</h3>
+            <button onclick="closeNewsModal()" class="admin-modal-close">&times;</button>
+        </div>
+        <form id="newsForm" onsubmit="handleNewsFormSubmit(event)">
+            <input type="hidden" id="newsFormId">
+            <input type="hidden" id="newsFormExistingImg">
+            <div class="admin-modal-body">
+                <div class="form-group">
+                    <label class="form-label">หัวข้อข่าว / ประกาศ: *</label>
+                    <input type="text" id="newsFormTitle" required class="form-control" placeholder="เช่น แจ้งกำหนดการปิดปรับปรุงระบบ">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">เนื้อหาข่าว / รายละเอียด:</label>
+                    <textarea id="newsFormContent" class="form-control" rows="4" placeholder="ระบุเนื้อหาข่าว..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">ลำดับการแสดงผล:</label>
+                    <input type="number" id="newsFormSort" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">รูปภาพประกอบข่าว (อัปโหลดเข้า Google Drive):</label>
+                    <div class="upload-dropzone" onclick="document.getElementById('newsFormImgFile').click()">
+                        <i class="fa-solid fa-image" style="font-size: 24px; color: var(--primary); margin-bottom: 4px;"></i>
+                        <div style="font-size: 13px; font-weight: 600;">คลิกเพื่อเลือกไฟล์รูปภาพข่าว</div>
+                    </div>
+                    <input type="file" id="newsFormImgFile" accept="image/*" style="display: none;" onchange="handleImagePreview(this, 'newsImgPreviewBox', 'newsImgPreviewTag')">
+                    <div id="newsImgPreviewBox" class="upload-preview-box" style="display: none;">
+                        <img id="newsImgPreviewTag" class="upload-preview-img" src="" alt="">
+                        <div><div style="font-size: 13px; font-weight: 600;">ตัวอย่างภาพข่าว</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" onclick="closeNewsModal()" class="btn btn-secondary">ยกเลิก</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> บันทึกข่าว</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Calendar Modal (Add/Edit) -->
+<div id="calendarModal" class="admin-modal-overlay">
+    <div class="admin-modal-dialog">
+        <div class="admin-modal-header">
+            <h3 id="calendarModalTitle" class="admin-modal-title"><i class="fa-regular fa-calendar-days"></i> จัดการกิจกรรมปฏิทิน</h3>
+            <button onclick="closeCalendarModal()" class="admin-modal-close">&times;</button>
+        </div>
+        <form id="calendarForm" onsubmit="handleCalendarFormSubmit(event)">
+            <input type="hidden" id="calendarFormId">
+            <div class="admin-modal-body">
+                <div class="form-group">
+                    <label class="form-label">ชื่อกิจกรรม / กำหนดการ: *</label>
+                    <input type="text" id="calendarFormTitle" required class="form-control" placeholder="เช่น ประชุมคณะกรรมการประจำเดือน">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">วันที่กิจกรรม: *</label>
+                        <input type="date" id="calendarFormDate" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">เวลา:</label>
+                        <input type="text" id="calendarFormTime" class="form-control" placeholder="เช่น 09:00 - 12:00 น. หรือ ตลอดวัน">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">สถานที่ / รายละเอียดเพิ่มเติม:</label>
+                    <textarea id="calendarFormDesc" class="form-control" rows="3" placeholder="ระบุสถานที่ หรือ รายละเอียด..."></textarea>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" onclick="closeCalendarModal()" class="btn btn-secondary">ยกเลิก</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> บันทึกกิจกรรม</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Admin User Modal (Add/Edit) -->
+<div id="adminUserModal" class="admin-modal-overlay">
+    <div class="admin-modal-dialog" style="max-width: 440px;">
+        <div class="admin-modal-header">
+            <h3 id="adminUserModalTitle" class="admin-modal-title"><i class="fa-solid fa-user-shield"></i> ผู้ดูแลระบบ</h3>
+            <button onclick="closeAdminUserModal()" class="admin-modal-close">&times;</button>
+        </div>
+        <form id="adminUserForm" onsubmit="handleAdminUserFormSubmit(event)">
+            <input type="hidden" id="adminUserFormId">
+            <div class="admin-modal-body">
+                <div class="form-group">
+                    <label class="form-label">ชื่อผู้ใช้งาน (Username): *</label>
+                    <input type="text" id="adminUserFormUsername" required class="form-control" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">รหัสผ่าน (Password): <span id="adminUserPassHint" style="font-size: 11px; color: var(--text-muted);">(เว้นว่างหากไม่เปลี่ยน)</span></label>
+                    <input type="password" id="adminUserFormPassword" class="form-control" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">บทบาท (Role):</label>
+                    <select id="adminUserFormRole" class="form-control">
+                        <option value="admin">Admin (ผู้ดูแลทั่วไป)</option>
+                        <option value="superadmin">Superadmin (ผู้ดูแลระบบสูงสุด)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" onclick="closeAdminUserModal()" class="btn btn-secondary">ยกเลิก</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> บันทึก</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div id="deleteConfirmModal" class="admin-modal-overlay">
+    <div class="admin-modal-dialog" style="max-width: 400px; text-align: center;">
+        <div class="admin-modal-body" style="padding: 32px 24px 20px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #ef4444; font-size: 26px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px;">ยืนยันการลบรายการ?</h3>
+            <p id="deleteConfirmMessage" style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px;">
+                คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้ การกระทำนี้ไม่สามารถย้อนกลับได้
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="closeDeleteConfirmModal()" class="btn btn-secondary" style="padding: 10px 20px;">ยกเลิก</button>
+                <button id="btnConfirmDeleteAction" class="btn btn-danger" style="padding: 10px 20px;">ยืนยันการลบ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+
+<script>
+    let adminData = {
+        settings: {},
+        categories: [],
+        apps: [],
+        news: [],
+        calendar: [],
+        admins: [],
+        logs: []
+    };
+    let deleteCallback = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        checkAuthAndInit();
+    });
+
+    // ------------------------------------------------------------------------
+    // 1. AUTHENTICATION
+    // ------------------------------------------------------------------------
+    function checkAuthAndInit() {
+        if (API.isLoggedIn()) {
+            const user = API.getCurrentUser();
+            document.getElementById('currentAdminUsername').innerText = user ? user.username : 'admin';
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('adminAppView').style.display = 'flex';
+            updateAdminApiBadge();
+            loadAdminDashboardData();
+        } else {
+            document.getElementById('loginView').style.display = 'flex';
+            document.getElementById('adminAppView').style.display = 'none';
+        }
+    }
+
+    async function handleLoginSubmit(event) {
+        event.preventDefault();
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const btn = document.getElementById('btnLoginSubmit');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...';
+
+        try {
+            // หากยังไม่ได้ตั้ง URL ลองเช็คว่าล็อกอินด้วย default credentials ได้หรือไม่
+            if (!CONFIG.getApiUrl() && username === 'admin' && password === 'admin123') {
+                localStorage.setItem('admin_auth_token', 'demo_token_' + Date.now());
+                localStorage.setItem('admin_auth_user', JSON.stringify({ id: 1, username: 'admin', role: 'superadmin' }));
+                API.toast("เข้าสู่ระบบสำเร็จ (โหมดสาธิต)", "success");
+                checkAuthAndInit();
+                return;
+            }
+
+            const res = await API.login(username, password);
+            if (res && res.status === 'success') {
+                API.toast("เข้าสู่ระบบสำเร็จ!", "success");
+                checkAuthAndInit();
+            }
+        } catch (error) {
+            API.toast(error.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'เข้าสู่ระบบ';
+        }
+    }
+
+    function handleLogout() {
+        API.logout();
+        API.toast("ออกจากระบบเรียบร้อยแล้ว", "info");
+        checkAuthAndInit();
+    }
+
+    // ------------------------------------------------------------------------
+    // 2. SPA TAB SWITCHING & SIDEBAR
+    // ------------------------------------------------------------------------
+    function switchAdminTab(tabName) {
+        document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+        const targetPane = document.getElementById('admin-tab-' + tabName);
+        if (targetPane) targetPane.classList.add('active');
+
+        const navLink = document.getElementById('side-nav-' + tabName);
+        if (navLink) navLink.classList.add('active');
+
+        if (window.innerWidth < 1024) {
+            document.body.classList.remove('sidebar-open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        // โหลดข้อมูลเฉพาะของแท็บนั้นๆ
+        if (tabName === 'apps') loadAdminAppsData();
+        if (tabName === 'categories') loadAdminCategoriesData();
+        if (tabName === 'news') loadAdminNewsData();
+        if (tabName === 'calendar') loadAdminCalendarData();
+        if (tabName === 'settings') loadAdminSettingsData();
+        if (tabName === 'admins') loadAdminUsersData();
+        if (tabName === 'logs') loadAdminLogsData();
+    }
+
+    function toggleSidebar() {
+        document.body.classList.toggle('sidebar-open');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (overlay) overlay.classList.toggle('active');
+    }
+
+    function updateAdminApiBadge() {
+        const url = CONFIG.getApiUrl();
+        const badge = document.getElementById('adminApiStatusBadge');
+        const text = document.getElementById('adminApiStatusText');
+        if (url) {
+            badge.className = 'api-config-badge connected';
+            text.innerText = 'GAS Connected';
+        } else {
+            badge.className = 'api-config-badge fallback';
+            text.innerText = 'Set GAS URL';
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 3. DASHBOARD TAB DATA
+    // ------------------------------------------------------------------------
+    async function loadAdminDashboardData(force = false) {
+        try {
+            const data = await API.getInitialData(force);
+            if (data) {
+                adminData = { ...adminData, ...data };
+                document.getElementById('statAppsCount').innerText = (data.apps || []).length;
+                document.getElementById('statCategoriesCount').innerText = (data.categories || []).length;
+                document.getElementById('statNewsCount').innerText = (data.news || []).length;
+                document.getElementById('statCalendarCount').innerText = (data.calendar || []).length;
+            }
+
+            // โหลด Logs ล่าสุด
+            const logsRes = await API.getLogs();
+            if (logsRes && logsRes.data) {
+                adminData.logs = logsRes.data;
+                renderDashboardLogs(logsRes.data.slice(0, 5));
+            } else {
+                renderDashboardLogs([]);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function renderDashboardLogs(logs) {
+        const tbody = document.getElementById('dashboardRecentLogsTbody');
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">ยังไม่มีประวัติการทำงาน</td></tr>';
+            return;
+        }
+        tbody.innerHTML = logs.map(l => `
+            <tr>
+                <td>${escapeHtml(String(l.id))}</td>
+                <td><span class="badge badge-primary">${escapeHtml(l.admin_username || 'system')}</span></td>
+                <td>${escapeHtml(l.action)}</td>
+                <td style="font-size: 12px; color: var(--text-muted);">${escapeHtml(API.formatThaiDateTime(l.created_at))}</td>
+            </tr>
+        `).join('');
+    }
+
+    // ------------------------------------------------------------------------
+    // 4. APPS CRUD
+    // ------------------------------------------------------------------------
+    async function loadAdminAppsData() {
+        const data = await API.getInitialData(true);
+        if (data) {
+            adminData.apps = data.apps || [];
+            adminData.categories = data.categories || [];
+            renderAdminAppsTable();
+            populateCategoryDropdowns();
+        }
+    }
+
+    function renderAdminAppsTable() {
+        const tbody = document.getElementById('adminAppsTbody');
+        const apps = adminData.apps || [];
+
+        if (apps.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">ยังไม่มีข้อมูลแอปพลิเคชัน</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = apps.map(app => {
+            const firstChar = (app.name || '').substring(0, 1);
+            const iconHtml = app.icon
+                ? `<img src="${escapeHtml(app.icon)}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border);">`
+                : `<div style="width: 36px; height: 36px; border-radius: 8px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-weight: 700;">${escapeHtml(firstChar)}</div>`;
+
+            return `
+                <tr class="admin-app-row" data-name="${(app.name || '').toLowerCase()}" data-category="${escapeHtml(app.category || '')}">
+                    <td><strong>${escapeHtml(String(app.sort_order || 0))}</strong></td>
+                    <td>${iconHtml}</td>
+                    <td>
+                        <div style="font-weight: 700; color: var(--text);">${escapeHtml(app.name)}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">${escapeHtml(app.description || '-')}</div>
+                        <a href="${escapeHtml(app.url)}" target="_blank" style="font-size: 11px; color: var(--primary); text-decoration: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${escapeHtml(app.url)}</a>
+                    </td>
+                    <td><span class="badge badge-gray">${escapeHtml(app.category || 'ทั่วไป')}</span></td>
+                    <td><span class="badge ${app.open_mode === 'iframe' ? 'badge-warning' : 'badge-primary'}">${app.open_mode === 'iframe' ? 'In-App Modal' : 'New Tab'}</span></td>
+                    <td>${app.is_favorite == 1 ? '<span class="badge badge-danger"><i class="fa-solid fa-heart"></i> ปักหมุด</span>' : '-'}</td>
+                    <td style="text-align: center;">
+                        <button onclick="editApp(${app.id})" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="confirmDelete('app', ${app.id}, '${escapeHtml(app.name)}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function filterAdminAppsTable() {
+        const query = document.getElementById('adminAppsSearch').value.trim().toLowerCase();
+        const catFilter = document.getElementById('adminAppsCategoryFilter').value;
+        document.querySelectorAll('.admin-app-row').forEach(row => {
+            const name = row.getAttribute('data-name');
+            const cat = row.getAttribute('data-category');
+            const matchesQuery = name.includes(query);
+            const matchesCat = (catFilter === 'all' || cat === catFilter);
+            row.style.display = (matchesQuery && matchesCat) ? '' : 'none';
+        });
+    }
+
+    function populateCategoryDropdowns() {
+        const categories = adminData.categories || [];
+        const appFormCat = document.getElementById('appFormCategory');
+        const filterCat = document.getElementById('adminAppsCategoryFilter');
+
+        appFormCat.innerHTML = '';
+        filterCat.innerHTML = '<option value="all">ทุกหมวดหมู่</option>';
+
+        categories.forEach(c => {
+            const name = typeof c === 'string' ? c : c.name;
+            appFormCat.innerHTML += `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
+            filterCat.innerHTML += `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
+        });
+    }
+
+    function openAppModal(app = null) {
+        document.getElementById('appForm').reset();
+        document.getElementById('appIconPreviewBox').style.display = 'none';
+        populateCategoryDropdowns();
+
+        if (app) {
+            document.getElementById('appModalTitle').innerHTML = '<i class="fa-solid fa-pen"></i> แก้ไขแอปพลิเคชัน';
+            document.getElementById('appFormId').value = app.id;
+            document.getElementById('appFormName').value = app.name || '';
+            document.getElementById('appFormDesc').value = app.description || '';
+            document.getElementById('appFormUrl').value = app.url || '';
+            document.getElementById('appFormCategory').value = app.category || 'ทั่วไป';
+            document.getElementById('appFormSort').value = app.sort_order || 0;
+            document.getElementById('appFormOpenMode').value = app.open_mode || 'new_tab';
+            document.getElementById('appFormIsFavorite').checked = (app.is_favorite == 1);
+            document.getElementById('appFormExistingIcon').value = app.icon || '';
+
+            if (app.icon) {
+                document.getElementById('appIconPreviewImgTag').src = app.icon;
+                document.getElementById('appIconPreviewBox').style.display = 'flex';
+            }
+        } else {
+            document.getElementById('appModalTitle').innerHTML = '<i class="fa-solid fa-plus"></i> เพิ่มแอปพลิเคชันใหม่';
+            document.getElementById('appFormId').value = '';
+            document.getElementById('appFormExistingIcon').value = '';
+        }
+
+        document.getElementById('appModal').classList.add('active');
+    }
+
+    function closeAppModal() {
+        document.getElementById('appModal').classList.remove('active');
+    }
+
+    function editApp(id) {
+        const app = (adminData.apps || []).find(a => a.id == id);
+        if (app) openAppModal(app);
+    }
+
+    async function handleAppFormSubmit(event) {
+        event.preventDefault();
+        const id = document.getElementById('appFormId').value;
+        const name = document.getElementById('appFormName').value.trim();
+        const description = document.getElementById('appFormDesc').value.trim();
+        const url = document.getElementById('appFormUrl').value.trim();
+        const category = document.getElementById('appFormCategory').value;
+        const sort_order = parseInt(document.getElementById('appFormSort').value, 10) || 0;
+        const open_mode = document.getElementById('appFormOpenMode').value;
+        const is_favorite = document.getElementById('appFormIsFavorite').checked ? 1 : 0;
+        const existingIcon = document.getElementById('appFormExistingIcon').value;
+        const iconFile = document.getElementById('appFormIconFile').files[0];
+
+        const payload = {
+            id: id || undefined,
+            name,
+            description,
+            url,
+            category,
+            sort_order,
+            open_mode,
+            is_favorite,
+            icon: existingIcon
+        };
+
+        API.showLoading(iconFile ? "กำลังอัปโหลดไอคอนเข้า Google Drive..." : "กำลังบันทึกข้อมูล...");
+
+        try {
+            await API.saveApp(payload, iconFile);
+            API.toast("บันทึกข้อมูลแอปพลิเคชันสำเร็จ!", "success");
+            closeAppModal();
+            loadAdminAppsData();
+        } catch (e) {
+            API.toast(e.message || "เกิดข้อผิดพลาดในการบันทึก", "error");
+        } finally {
+            API.hideLoading();
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 5. CATEGORIES CRUD
+    // ------------------------------------------------------------------------
+    async function loadAdminCategoriesData() {
+        const data = await API.getInitialData(true);
+        if (data) {
+            adminData.categories = data.categories || [];
+            adminData.apps = data.apps || [];
+            renderAdminCategoriesTable();
+        }
+    }
+
+    function renderAdminCategoriesTable() {
+        const tbody = document.getElementById('adminCategoriesTbody');
+        const categories = adminData.categories || [];
+        const apps = adminData.apps || [];
+
+        if (categories.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">ยังไม่มีหมวดหมู่</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = categories.map(cat => {
+            const catName = typeof cat === 'string' ? cat : cat.name;
+            const catId = cat.id || 0;
+            const count = apps.filter(a => a.category === catName).length;
+
+            return `
+                <tr>
+                    <td><strong>${catId}</strong></td>
+                    <td style="font-weight: 700; color: var(--text);">${escapeHtml(catName)}</td>
+                    <td><span class="badge badge-primary">${count} รายการ</span></td>
+                    <td style="text-align: center;">
+                        <button onclick="editCategory(${catId}, '${escapeHtml(catName)}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="confirmDelete('category', ${catId}, '${escapeHtml(catName)}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function openCategoryModal(id = null, name = '') {
+        document.getElementById('categoryForm').reset();
+        document.getElementById('categoryFormId').value = id || '';
+        document.getElementById('categoryFormName').value = name || '';
+        document.getElementById('categoryModalTitle').innerHTML = id ? '<i class="fa-solid fa-pen"></i> แก้ไขหมวดหมู่' : '<i class="fa-solid fa-plus"></i> เพิ่มหมวดหมู่ใหม่';
+        document.getElementById('categoryModal').classList.add('active');
+    }
+
+    function closeCategoryModal() {
+        document.getElementById('categoryModal').classList.remove('active');
+    }
+
+    function editCategory(id, name) {
+        openCategoryModal(id, name);
+    }
+
+    async function handleCategoryFormSubmit(event) {
+        event.preventDefault();
+        const id = document.getElementById('categoryFormId').value;
+        const name = document.getElementById('categoryFormName').value.trim();
+
+        API.showLoading("กำลังบันทึกหมวดหมู่...");
+        try {
+            await API.saveCategory({ id: id || undefined, name });
+            API.toast("บันทึกหมวดหมู่สำเร็จ!", "success");
+            closeCategoryModal();
+            loadAdminCategoriesData();
+        } catch (e) {
+            API.toast(e.message || "เกิดข้อผิดพลาด", "error");
+        } finally {
+            API.hideLoading();
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 6. NEWS CRUD
+    // ------------------------------------------------------------------------
+    async function loadAdminNewsData() {
+        const data = await API.getInitialData(true);
+        if (data) {
+            adminData.news = data.news || [];
+            renderAdminNewsTable();
+        }
+    }
+
+    function renderAdminNewsTable() {
+        const tbody = document.getElementById('adminNewsTbody');
+        const news = adminData.news || [];
+
+        if (news.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">ยังไม่มีข่าวสาร</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = news.map(item => `
+            <tr>
+                <td><strong>${escapeHtml(String(item.sort_order || 0))}</strong></td>
+                <td>
+                    ${item.image 
+                        ? `<img src="${escapeHtml(item.image)}" style="width: 44px; height: 36px; object-fit: cover; border-radius: 6px;">`
+                        : '<span style="color: var(--text-muted); font-size: 11px;">ไม่มีภาพ</span>'
+                    }
+                </td>
+                <td>
+                    <div style="font-weight: 700; color: var(--text);">${escapeHtml(item.title)}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">${escapeHtml(stripTags(item.content || '').substring(0, 70))}...</div>
+                </td>
+                <td style="font-size: 12px; color: var(--text-muted);">${escapeHtml(API.formatThaiDateTime(item.created_at))}</td>
+                <td style="text-align: center;">
+                    <button onclick="editNews(${item.id})" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="confirmDelete('news', ${item.id}, '${escapeHtml(item.title)}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openNewsModal(item = null) {
+        document.getElementById('newsForm').reset();
+        document.getElementById('newsImgPreviewBox').style.display = 'none';
+
+        if (item) {
+            document.getElementById('newsModalTitle').innerHTML = '<i class="fa-solid fa-pen"></i> แก้ไขข่าวสาร';
+            document.getElementById('newsFormId').value = item.id;
+            document.getElementById('newsFormTitle').value = item.title || '';
+            document.getElementById('newsFormContent').value = item.content || '';
+            document.getElementById('newsFormSort').value = item.sort_order || 0;
+            document.getElementById('newsFormExistingImg').value = item.image || '';
+
+            if (item.image) {
+                document.getElementById('newsImgPreviewTag').src = item.image;
+                document.getElementById('newsImgPreviewBox').style.display = 'flex';
+            }
+        } else {
+            document.getElementById('newsModalTitle').innerHTML = '<i class="fa-solid fa-plus"></i> เพิ่มข่าวสารใหม่';
+            document.getElementById('newsFormId').value = '';
+            document.getElementById('newsFormExistingImg').value = '';
+        }
+
+        document.getElementById('newsModal').classList.add('active');
+    }
+
+    function closeNewsModal() {
+        document.getElementById('newsModal').classList.remove('active');
+    }
+
+    function editNews(id) {
+        const item = (adminData.news || []).find(n => n.id == id);
+        if (item) openNewsModal(item);
+    }
+
+    async function handleNewsFormSubmit(event) {
+        event.preventDefault();
+        const id = document.getElementById('newsFormId').value;
+        const title = document.getElementById('newsFormTitle').value.trim();
+        const content = document.getElementById('newsFormContent').value.trim();
+        const sort_order = parseInt(document.getElementById('newsFormSort').value, 10) || 0;
+        const existingImg = document.getElementById('newsFormExistingImg').value;
+        const imgFile = document.getElementById('newsFormImgFile').files[0];
+
+        const payload = {
+            id: id || undefined,
+            title,
+            content,
+            sort_order,
+            image: existingImg
+        };
+
+        API.showLoading(imgFile ? "กำลังอัปโหลดรูปภาพเข้า Google Drive..." : "กำลังบันทึกข่าว...");
+        try {
+            await API.saveNews(payload, imgFile);
+            API.toast("บันทึกข่าวสารสำเร็จ!", "success");
+            closeNewsModal();
+            loadAdminNewsData();
+        } catch (e) {
+            API.toast(e.message || "เกิดข้อผิดพลาด", "error");
+        } finally {
+            API.hideLoading();
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 7. CALENDAR CRUD
+    // ------------------------------------------------------------------------
+    async function loadAdminCalendarData() {
+        const data = await API.getInitialData(true);
+        if (data) {
+            adminData.calendar = data.calendar || [];
+            renderAdminCalendarTable();
+        }
+    }
+
+    function renderAdminCalendarTable() {
+        const tbody = document.getElementById('adminCalendarTbody');
+        const list = adminData.calendar || [];
+
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">ยังไม่มีกิจกรรมในปฏิทิน</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = list.map(item => `
+            <tr>
+                <td><strong>${escapeHtml(API.formatThaiDate(item.event_date))}</strong></td>
+                <td><span class="badge badge-gray">${escapeHtml(item.event_time || '-')}</span></td>
+                <td><div style="font-weight: 700; color: var(--text);">${escapeHtml(item.event_title)}</div></td>
+                <td style="font-size: 12px; color: var(--text-muted);">${escapeHtml(item.description || '-')}</td>
+                <td style="text-align: center;">
+                    <button onclick="editCalendar(${item.id})" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="confirmDelete('calendar', ${item.id}, '${escapeHtml(item.event_title)}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openCalendarModal(item = null) {
+        document.getElementById('calendarForm').reset();
+        if (item) {
+            document.getElementById('calendarModalTitle').innerHTML = '<i class="fa-solid fa-pen"></i> แก้ไขกิจกรรมปฏิทิน';
+            document.getElementById('calendarFormId').value = item.id;
+            document.getElementById('calendarFormTitle').value = item.event_title || '';
+            document.getElementById('calendarFormDate').value = item.event_date || '';
+            document.getElementById('calendarFormTime').value = item.event_time || '';
+            document.getElementById('calendarFormDesc').value = item.description || '';
+        } else {
+            document.getElementById('calendarModalTitle').innerHTML = '<i class="fa-solid fa-plus"></i> เพิ่มกิจกรรมปฏิทินใหม่';
+            document.getElementById('calendarFormId').value = '';
+        }
+        document.getElementById('calendarModal').classList.add('active');
+    }
+
+    function closeCalendarModal() {
+        document.getElementById('calendarModal').classList.remove('active');
+    }
+
+    function editCalendar(id) {
+        const item = (adminData.calendar || []).find(c => c.id == id);
+        if (item) openCalendarModal(item);
+    }
+
+    async function handleCalendarFormSubmit(event) {
+        event.preventDefault();
+        const id = document.getElementById('calendarFormId').value;
+        const event_title = document.getElementById('calendarFormTitle').value.trim();
+        const event_date = document.getElementById('calendarFormDate').value;
+        const event_time = document.getElementById('calendarFormTime').value.trim();
+        const description = document.getElementById('calendarFormDesc').value.trim();
+
+        API.showLoading("กำลังบันทึกกิจกรรม...");
+        try {
+            await API.saveCalendar({ id: id || undefined, event_title, event_date, event_time, description });
+            API.toast("บันทึกกิจกรรมปฏิทินสำเร็จ!", "success");
+            closeCalendarModal();
+            loadAdminCalendarData();
+        } catch (e) {
+            API.toast(e.message || "เกิดข้อผิดพลาด", "error");
+        } finally {
+            API.hideLoading();
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 8. SETTINGS MANAGEMENT
+    // ------------------------------------------------------------------------
+    async function loadAdminSettingsData() {
+        document.getElementById('settingGasApiUrl').value = CONFIG.getApiUrl();
+        const data = await API.getInitialData(true);
+        if (data && data.settings) {
+            const s = data.settings;
+            document.getElementById('settingSystemName').value = s.system_name || '';
+            document.getElementById('settingSystemFooter').value = s.system_footer || '';
+            document.getElementById('settingMarqueeEnabled').checked = (s.marquee_enabled === '1');
+            document.getElementById('settingMarqueeText').value = s.marquee_text || '';
+            document.getElementById('settingMarqueeColor').value = s.marquee_color || 'danger';
+            document.getElementById('settingPopupEnabled').checked = (s.popup_enabled === '1');
+            document.getElementById('settingPopupTitle').value = s.popup_title || '';
+            document.getElementById('settingPopupContent').value = s.popup_content || '';
+            document.getElementById('settingPopupLink').value = s.popup_link || '';
+
+            if (s.system_icon) {
+                document.getElementById('settingIconPreviewImg').src = s.system_icon;
+                document.getElementById('settingIconPreview').style.display = 'flex';
+            }
+            if (s.popup_image) {
+                document.getElementById('settingPopupImgPreviewTag').src = s.popup_image;
+                document.getElementById('settingPopupImgPreview').style.display = 'flex';
+            }
+        }
+    }
+
+    async function testAndSaveGasUrl() {
+        const url = document.getElementById('settingGasApiUrl').value.trim();
+        if (!url) {
+            CONFIG.setApiUrl('');
+            updateAdminApiBadge();
+            API.toast("ล้างค่า API URL เรียบร้อยแล้ว", "info");
+            return;
+        }
+
+        API.showLoading("กำลังทดสอบการเชื่อมต่อ GAS API...");
+        try {
+            const res = await fetch(`${url}?action=ping`);
+            const json = await res.json();
+            if (json && json.status === 'success') {
+                CONFIG.setApiUrl(url);
+                updateAdminApiBadge();
+                API.toast("เชื่อมต่อ Google Apps Script สำเร็จ! 🎉", "success");
+                loadAdminDashboardData(true);
+            } else {
+                throw new Error("API ตอบกลับไม่ถูกต้อง");
+            }
+        } catch (e) {
+            API.toast("ไม่สามารถเชื่อมต่อ API ได้ กรุณาตรวจสอบ URL และสิทธิ์การ Deploy เป็น Anyone", "error");
+        } finally {
+            API.hideLoading();
+        }
+    }
+
+    async function saveAllSettings() {
+        const system_name = document.getElementById('settingSystemName').value.trim();
+        const system_footer = document.getElementById('settingSystemFooter').value.trim();
+        const marquee_enabled = document.getElementById('settingMarqueeEnabled').checked ? '1' : '0';
+        const marquee_text = document.getElementById('settingMarqueeText').value.trim();
+        const marquee_color = document.getElementById('settingMarqueeColor').value;
+        const popup_enabled = document.getElementById('settingPopupEnabled').checked ? '1' : '0';
+        const popup_title = document.getElementById('settingPopupTitle').value.trim();
+        const popup_content = document.getElementById('settingPopupContent').value.trim();
+        const popup_link = document.getElementById('settingPopupLink').value.trim();
+
+        const iconFile = document.getElementById('settingIconInput').files[0];
+        const popupFile = document.getElementById('settingPopupImgInput').files[0];
+
+        const settingsData = {
+            system_name,
+            system_footer,
+            marquee_enabled,
+            marquee_text,
+            marquee_color,
+            popup_enabled,
+            popup_title,
+            popup_content,
+            popup_link
+        };
+
+        API.showLoading("กำลังบันทึกการตั้งค่าระบบ...");
+        try {
+            await API.saveSettings(settingsData, { icon: iconFile, popup: popupFile });
+            API.toast("บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!", "success");
+            loadAdminSettingsData();
+        } catch (e) {
+            API.toast(e.message || "เกิดข้อผิดพลาดในการบันทึกการตั้งค่า", "error");
+        } finally {
+            API.hideLoading();
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 9. ADMINS & LOGS
+    // ------------------------------------------------------------------------
+    async function loadAdminUsersData() {
+        try {
+            const res = await API.getAdmins();
+            if (res && res.data) {
+                adminData.admins = res.data;
+                renderAdminUsersTable();
+            }
+        } catch (e) {
+            renderAdminUsersTable();
+        }
+    }
+
+    function renderAdminUsersTable() {
+        const tbody = document.getElementById('adminUsersTbody');
+        const admins = adminData.admins || [{ id: 1, username: 'admin', role: 'superadmin', created_at: '-' }];
+
+        tbody.innerHTML = admins.map(adm => `
+            <tr>
+                <td><strong>${adm.id}</strong></td>
+                <td><div style="font-weight: 700; color: var(--text);"><i class="fa-solid fa-user-shield" style="color: var(--primary); margin-right: 6px;"></i> ${escapeHtml(adm.username)}</div></td>
+                <td><span class="badge ${adm.role === 'superadmin' ? 'badge-danger' : 'badge-primary'}">${escapeHtml(adm.role || 'admin')}</span></td>
+                <td style="font-size: 12px; color: var(--text-muted);">${escapeHtml(API.formatThaiDateTime(adm.created_at))}</td>
+                <td style="text-align: center;">
+                    <button onclick="editAdminUser(${adm.id}, '${escapeHtml(adm.username)}', '${escapeHtml(adm.role)}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-key"></i></button>
+                    ${admins.length > 1 ? `<button onclick="confirmDelete('admin', ${adm.id}, '${escapeHtml(adm.username)}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openAdminUserModal(id = null, username = '', role = 'admin') {
+        document.getElementById('adminUserForm').reset();
+        document.getElementById('adminUserFormId').value = id || '';
+        document.getElementById('adminUserFormUsername').value = username || '';
+        document.getElementById('adminUserFormRole').value = role || 'admin';
+        document.getElementById('adminUserModalTitle').innerHTML = id ? '<i class="fa-solid fa-pen"></i> แก้ไขผู้ดูแลระบบ' : '<i class="fa-solid fa-plus"></i> เพิ่มผู้ดูแลระบบใหม่';
+        document.getElementById('adminUserPassHint').style.display = id ? 'inline' : 'none';
+        document.getElementById('adminUserModal').classList.add('active');
+    }
+
+    function closeAdminUserModal() {
+        document.getElementById('adminUserModal').classList.remove('active');
+    }
+
+    function editAdminUser(id, username, role) {
+        openAdminUserModal(id, username, role);
+    }
+
+    async function handleAdminUserFormSubmit(event) {
+        event.preventDefault();
+        const id = document.getElementById('adminUserFormId').value;
+        const username = document.getElementById('adminUserFormUsername').value.trim();
+        const password = document.getElementById('adminUserFormPassword').value.trim();
+        const role = document.getElementById('adminUserFormRole').value;
+
+        API.showLoading("กำลังบันทึกข้อมูลผู้ดูแลระบบ...");
+        try {
+            await API.saveAdmin({ id: id || undefined, username, password, role });
+            API.toast("บันทึกผู้ดูแลระบบสำเร็จ!", "success");
+            closeAdminUserModal();
+            loadAdminUsersData();
+        } catch (e) {
+            API.toast(e.message || "เกิดข้อผิดพลาด", "error");
+        } finally {
+            API.hideLoading();
+        }
+    }
+
+    async function loadAdminLogsData() {
+        const tbody = document.getElementById('adminFullLogsTbody');
+        try {
+            const res = await API.getLogs();
+            const logs = (res && res.data) ? res.data : [];
+            if (logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">ยังไม่มีประวัติการทำงาน</td></tr>';
+                return;
+            }
+            tbody.innerHTML = logs.map(l => `
+                <tr>
+                    <td>${escapeHtml(String(l.id))}</td>
+                    <td><span class="badge badge-primary">${escapeHtml(l.admin_username || 'system')}</span></td>
+                    <td>${escapeHtml(l.action)}</td>
+                    <td style="font-size: 12px; color: var(--text-muted);">${escapeHtml(l.ip_address || 'API')}</td>
+                    <td style="font-size: 12px; color: var(--text-muted);">${escapeHtml(API.formatThaiDateTime(l.created_at))}</td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">ไม่สามารถโหลดประวัติการทำงานได้</td></tr>';
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 10. REUSABLE DELETE CONFIRMATION & UTILITIES
+    // ------------------------------------------------------------------------
+    function confirmDelete(type, id, name) {
+        document.getElementById('deleteConfirmMessage').innerHTML = `คุณแน่ใจหรือไม่ว่าต้องการลบ <strong>"${escapeHtml(name)}"</strong>?`;
+        deleteCallback = async () => {
+            API.showLoading("กำลังลบข้อมูล...");
+            try {
+                if (type === 'app') await API.deleteApp(id);
+                if (type === 'category') await API.deleteCategory(id);
+                if (type === 'news') await API.deleteNews(id);
+                if (type === 'calendar') await API.deleteCalendar(id);
+                if (type === 'admin') await API.deleteAdmin(id);
+
+                API.toast("ลบข้อมูลเรียบร้อยแล้ว", "success");
+                closeDeleteConfirmModal();
+
+                if (type === 'app') loadAdminAppsData();
+                if (type === 'category') loadAdminCategoriesData();
+                if (type === 'news') loadAdminNewsData();
+                if (type === 'calendar') loadAdminCalendarData();
+                if (type === 'admin') loadAdminUsersData();
+            } catch (e) {
+                API.toast(e.message || "เกิดข้อผิดพลาดในการลบ", "error");
+            } finally {
+                API.hideLoading();
+            }
+        };
+        document.getElementById('btnConfirmDeleteAction').onclick = deleteCallback;
+        document.getElementById('deleteConfirmModal').classList.add('active');
+    }
+
+    function closeDeleteConfirmModal() {
+        document.getElementById('deleteConfirmModal').classList.remove('active');
+        deleteCallback = null;
+    }
+
+    function handleImagePreview(fileInput, containerId, imgId) {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById(imgId).src = e.target.result;
+                document.getElementById(containerId).style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function stripTags(html) {
+        const tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    }
+</script>
+
+</body>
+</html>

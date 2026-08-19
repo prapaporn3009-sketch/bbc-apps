@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="pageTitle">ศูนย์รวมบริการดิจิทัล</title>
+    
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Favicon & Touch Icon -->
+    <link rel="icon" id="dynamicFavicon" href="assets/uploads/system_logo.png">
+    <link rel="apple-touch-icon" id="dynamicAppleIcon" href="assets/uploads/system_logo.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="assets/manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    
+    <!-- QR Code Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+</head>
+<body>
+
+<div class="mobile-app-wrapper">
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" style="display: none; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 12px 16px; border-bottom: 2px solid var(--primary); z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1); animation: slideDown 0.3s ease-out;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; background-color: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--primary);">
+                <i class="fa-solid fa-cloud-arrow-down"></i>
+            </div>
+            <div>
+                <div style="font-size: 13px; font-weight: 700; line-height: 1.2;">ติดตั้งแอปลงบนอุปกรณ์</div>
+                <div style="font-size: 10px; color: #94a3b8;">เข้าใช้งานด่วนเสมือนแอปจริง รวดเร็ว ไม่กินพื้นที่</div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="btnPwaInstall" style="background-color: var(--primary); border: none; padding: 6px 12px; border-radius: 20px; color: white; font-family: 'Prompt', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">ติดตั้ง</button>
+            <button onclick="dismissPwaBanner()" style="background: none; border: none; color: #64748b; font-size: 16px; cursor: pointer; padding: 4px;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <!-- แถบข้อความวิ่งประชาสัมพันธ์ (Marquee Banner) -->
+    <div id="marqueeBannerContainer" style="display: none;"></div>
+
+    <!-- Main App Header -->
+    <header class="app-header">
+        <div class="header-top-bar">
+            <div class="header-branding">
+                <div class="logo-wrapper-header" id="headerLogoContainer">
+                    <i class="fa-solid fa-graduation-cap fallback-logo-icon"></i>
+                </div>
+                <div class="branding-text">
+                    <span class="header-welcome-text">ยินดีต้อนรับ</span>
+                    <h1 class="header-title-text" id="headerSystemName">ศูนย์รวมบริการดิจิทัล</h1>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px; align-items: center; flex-grow: 1; justify-content: flex-end; min-width: 0;">
+                <div class="search-box-wrapper">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาบริการ...">
+                    </div>
+                </div>
+                <button class="btn-refresh-toggle" onclick="reloadPortalData(true)" title="รีเฟรชข้อมูลล่าสุด">
+                    <i class="fa-solid fa-rotate-right" id="refreshIcon"></i>
+                </button>
+                <button class="btn-theme-toggle" onclick="toggleTheme()" title="สลับโหมด มืด/สว่าง">
+                    <i class="fa-regular fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Desktop Navigation Bar -->
+        <nav class="desktop-nav-menu">
+            <a href="#" onclick="switchTab('home'); return false;" class="desktop-nav-link active" id="desktop-nav-home"><i class="fa-solid fa-house"></i> หน้าหลัก</a>
+            <a href="#" onclick="switchTab('news'); return false;" class="desktop-nav-link" id="desktop-nav-news"><i class="fa-regular fa-newspaper"></i> ข่าวสาร</a>
+            <a href="#" onclick="switchTab('services'); return false;" class="desktop-nav-link" id="desktop-nav-services"><i class="fa-solid fa-grip"></i> บริการทั้งหมด</a>
+            <a href="calendar.html" class="desktop-nav-link"><i class="fa-regular fa-calendar-days"></i> ปฏิทินวิชาการ</a>
+            <button onclick="openQrScanner(); return false;" class="desktop-nav-btn-scan"><i class="fa-solid fa-qrcode"></i> สแกน QR</button>
+            <a href="admin.html" class="desktop-nav-link btn-admin-link"><i class="fa-solid fa-user-gear"></i> Admin</a>
+        </nav>
+    </header>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 1: หน้าหลัก (HOME TAB) -->
+    <!-- ==================================================================== -->
+    <div id="tab-home" class="tab-content active">
+        <main class="main-content">
+            <!-- Skeleton Loader -->
+            <div id="skeletonLoader" class="skeleton-container" style="display: block; width: 100%;">
+                <div class="skeleton" style="width: 100%; height: 160px; border-radius: 16px; margin-bottom: 24px;"></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; padding: 0 8px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1;"><div class="skeleton" style="width: 48px; height: 48px; border-radius: 50%;"></div><div class="skeleton" style="width: 40px; height: 12px;"></div></div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1;"><div class="skeleton" style="width: 48px; height: 48px; border-radius: 50%;"></div><div class="skeleton" style="width: 50px; height: 12px;"></div></div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1;"><div class="skeleton" style="width: 48px; height: 48px; border-radius: 50%;"></div><div class="skeleton" style="width: 50px; height: 12px;"></div></div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1;"><div class="skeleton" style="width: 48px; height: 48px; border-radius: 50%;"></div><div class="skeleton" style="width: 60px; height: 12px;"></div></div>
+                </div>
+                <div class="skeleton" style="width: 120px; height: 20px; margin-bottom: 16px;"></div>
+                <div class="app-grid">
+                    <div class="skeleton" style="height: 100px; border-radius: 16px;"></div>
+                    <div class="skeleton" style="height: 100px; border-radius: 16px;"></div>
+                    <div class="skeleton" style="height: 100px; border-radius: 16px;"></div>
+                </div>
+            </div>
+
+            <!-- Real Content -->
+            <div id="realContent" style="display: none; width: 100%;">
+                <!-- Desktop Hero Grid (Image Slider + Quick Card) -->
+                <div class="desktop-hero-grid">
+                    <!-- Image Slider -->
+                    <div class="slider-container">
+                        <div class="slider-wrapper" id="sliderWrapper"></div>
+                        <div class="slider-dots" id="sliderDots"></div>
+                    </div>
+
+                    <!-- Side Widget Card -->
+                    <div class="desktop-hero-side-card">
+                        <div>
+                            <div class="hero-card-header">
+                                <div class="hero-card-icon">
+                                    <i class="fa-solid fa-rocket"></i>
+                                </div>
+                                <div>
+                                    <div class="hero-card-title" id="sideCardTitle">ศูนย์รวมบริการดิจิทัล</div>
+                                    <span style="font-size: 11px; color: var(--primary); font-weight: 700;">WEB PORTAL & GAS API</span>
+                                </div>
+                            </div>
+                            <p class="hero-card-desc">เข้าถึงบริการดิจิทัลและระบบสารสนเทศของหน่วยงานได้อย่างรวดเร็ว ปลอดภัย และเสถียร รองรับการใช้งานบนทุกอุปกรณ์</p>
+                        </div>
+                        <div class="hero-card-actions">
+                            <button onclick="openQrScanner(); return false;" class="btn-hero-action primary">
+                                <i class="fa-solid fa-qrcode"></i> สแกน QR Code เปิดบริการ
+                            </button>
+                            <a href="#" onclick="switchTab('services'); return false;" class="btn-hero-action secondary" id="btnSeeAllCount">
+                                <i class="fa-solid fa-list-check"></i> ดูบริการทั้งหมด
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- หมวดหมู่บริการ (Categories Grid) -->
+                <div class="section" style="margin-top: 10px; padding: 20px 16px;">
+                    <div class="section-header" style="margin-bottom: 16px;">
+                        <div class="section-title" style="border-left: 3px solid var(--primary);">หมวดหมู่บริการ</div>
+                    </div>
+                    <div class="category-grid" id="homeCategoriesGrid"></div>
+                </div>
+
+                <!-- บริการใหม่ (New Apps Grid) -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">บริการใหม่ <span class="tag-new">NEW</span></div>
+                        <a href="#" onclick="switchTab('services'); return false;" class="btn-see-all">ดูทั้งหมด</a>
+                    </div>
+                    <div class="app-grid" id="newAppsGrid"></div>
+                </div>
+
+                <!-- 2 คอลัมน์บน Desktop: บริการโปรด + ปฏิทินวิชาการ -->
+                <div class="desktop-row-2col">
+                    <!-- บริการโปรด -->
+                    <div class="section" style="margin-bottom: 20px;">
+                        <div class="section-header">
+                            <div class="section-title" style="border-left: 3px solid #ef4444;">บริการโปรดของคุณ</div>
+                            <a href="#" onclick="switchTab('services'); return false;" class="btn-see-all">ดูทั้งหมด</a>
+                        </div>
+                        <div class="app-grid" id="favoriteAppsGrid"></div>
+                    </div>
+
+                    <!-- ปฏิทินวิชาการ -->
+                    <div class="section" style="margin-bottom: 25px;">
+                        <div class="section-header">
+                            <div class="section-title" style="border-left: 3px solid #10b981;">ปฏิทินวิชาการและกิจกรรม</div>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <a href="calendar.html" class="btn-see-all">ดูทั้งหมด</a>
+                            </div>
+                        </div>
+                        <div class="calendar-list" id="homeCalendarList"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 2: ข่าวสารและประกาศ (NEWS TAB) -->
+    <!-- ==================================================================== -->
+    <div id="tab-news" class="tab-content">
+        <header class="app-header">
+            <div class="header-top-bar">
+                <div class="header-branding">
+                    <div class="logo-wrapper-header">
+                        <i class="fa-regular fa-newspaper fallback-logo-icon" style="color: var(--primary);"></i>
+                    </div>
+                    <div class="branding-text">
+                        <span class="header-welcome-text">ข่าวสารและประกาศ</span>
+                        <h1 class="header-title-text">ประชาสัมพันธ์</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="main-content">
+            <div class="news-container" id="newsCardsContainer"></div>
+        </main>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 3: บริการทั้งหมด (ALL SERVICES TAB) -->
+    <!-- ==================================================================== -->
+    <div id="tab-services" class="tab-content">
+        <header class="app-header">
+            <div class="header-top-bar">
+                <div class="header-branding">
+                    <div class="logo-wrapper-header">
+                        <i class="fa-solid fa-grip fallback-logo-icon" style="color: var(--primary);"></i>
+                    </div>
+                    <div class="branding-text">
+                        <span class="header-welcome-text">ค้นหาและกรองบริการ</span>
+                        <h1 class="header-title-text">บริการทั้งหมด</h1>
+                    </div>
+                </div>
+                
+                <div class="search-box-wrapper">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="searchInputServices" class="search-input" placeholder="ค้นหาชื่อบริการ...">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content" style="padding-top: 10px;">
+            <!-- Category Pills Bar -->
+            <div class="category-pills-container">
+                <div class="category-pills-wrapper" id="categoryPillsWrapper">
+                    <button class="category-pill active" onclick="filterCategory('all', this)">ทั้งหมด</button>
+                </div>
+            </div>
+
+            <div class="section" style="margin-top: 10px; box-shadow: none; background: transparent; padding: 0;">
+                <div class="app-grid" id="allAppsGrid"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- BOTTOM NAVIGATION (MOBILE) -->
+    <!-- ==================================================================== -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" onclick="switchTab('home'); return false;" id="nav-home">
+            <div class="nav-icon"><i class="fa-solid fa-house"></i></div>
+            <span>หน้าหลัก</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchTab('news'); return false;" id="nav-news">
+            <div class="nav-icon"><i class="fa-regular fa-newspaper"></i></div>
+            <span>ข่าวสาร</span>
+        </a>
+        <a href="#" class="nav-item scan" onclick="openQrScanner(); return false;">
+            <div class="scan-button">
+                <i class="fa-solid fa-qrcode" style="font-size: 24px;"></i>
+            </div>
+            <span class="scan-text">สแกน</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchTab('services'); return false;" id="nav-services">
+            <div class="nav-icon"><i class="fa-solid fa-grip"></i></div>
+            <span>บริการ</span>
+        </a>
+        <a href="admin.html" class="nav-item">
+            <div class="nav-icon"><i class="fa-solid fa-user-gear"></i></div>
+            <span>Admin</span>
+        </a>
+    </nav>
+
+    <!-- Desktop Footer -->
+    <footer class="desktop-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div id="footerLogoContainer">
+                        <i class="fa-solid fa-graduation-cap" style="font-size: 24px; color: var(--primary);"></i>
+                    </div>
+                    <div class="footer-title" id="footerSystemName">ศูนย์รวมบริการดิจิทัล</div>
+                </div>
+                <p class="footer-desc" id="footerTextDesc">ศูนย์รวมบริการดิจิทัลและระบบสารสนเทศ อำนวยความสะดวก ปลอดภัย เข้าถึงง่ายตลอด 24 ชั่วโมง</p>
+            </div>
+            <div>
+                <div class="footer-section-title">เมนูด่วน</div>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="switchTab('home'); return false;">หน้าหลัก</a></li>
+                    <li><a href="#" onclick="switchTab('news'); return false;">ข่าวสารและประกาศ</a></li>
+                    <li><a href="#" onclick="switchTab('services'); return false;">บริการทั้งหมด</a></li>
+                    <li><a href="calendar.html">ปฏิทินวิชาการ</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="footer-section-title">ระบบและจัดการ</div>
+                <ul class="footer-links">
+                    <li><a href="admin.html"><i class="fa-solid fa-right-to-bracket"></i> แผงควบคุมระบบ (Admin)</a></li>
+                    <li><a href="#" onclick="openQrScanner(); return false;"><i class="fa-solid fa-qrcode"></i> สแกน QR Code</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; <span id="footerYear"></span> <span id="footerCopyName">ศูนย์รวมบริการดิจิทัล</span> - All Rights Reserved.</span>
+            <span>Google Sheets & Drive Backend (GAS API)</span>
+        </div>
+    </footer>
+</div>
+
+<!-- ==================================================================== -->
+<!-- MODALS -->
+<!-- ==================================================================== -->
+
+<!-- 1. News Detail Modal -->
+<div id="newsDetailModal" class="news-modal">
+    <div class="news-modal-content">
+        <div class="news-modal-header">
+            <div class="news-modal-date" id="modalNewsDate"></div>
+            <div class="news-modal-close" onclick="closeNewsModal()">&times;</div>
+        </div>
+        <div class="news-modal-body">
+            <img src="" alt="" id="modalNewsImage" class="news-modal-img" style="display: none;">
+            <h2 id="modalNewsTitle" class="news-modal-title"></h2>
+            <div id="modalNewsContent" class="news-modal-text"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. QR Code Scanner Modal -->
+<div id="qrScannerModal" class="qr-modal">
+    <div class="qr-modal-content">
+        <div class="qr-modal-header">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 8px; margin: 0;">
+                <i class="fa-solid fa-qrcode" style="color: var(--primary);"></i> สแกน QR Code เพื่อเปิดบริการ
+            </h3>
+            <div class="qr-modal-close" onclick="closeQrScanner()">&times;</div>
+        </div>
+        <div class="qr-modal-body">
+            <div class="qr-scanner-box">
+                <div id="qr-reader" style="width: 100%; height: 100%;"></div>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.4; padding: 0 10px; margin: 0;">
+                จัดคิวอาร์โค้ดให้อยู่ในกรอบสี่เหลี่ยม ระบบจะสแกนและเปิดบริการปลายทางให้อัตโนมัติ
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Welcome Popup Modal -->
+<div id="systemWelcomePopup" class="system-popup-overlay">
+    <div class="system-popup-card">
+        <img id="systemPopupImg" class="system-popup-img" src="" alt="" style="display: none;">
+        <div class="system-popup-body">
+            <h3 id="systemPopupTitle" class="system-popup-title"></h3>
+            <div id="systemPopupText" class="system-popup-text"></div>
+            <div class="system-popup-actions">
+                <a id="systemPopupLinkBtn" href="#" target="_blank" class="btn" style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; display: none;">ดูรายละเอียด</a>
+                <button onclick="closeWelcomePopup()" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. API Config Quick Modal -->
+<div id="apiConfigModal" class="system-popup-overlay">
+    <div class="system-popup-card" style="max-width: 480px;">
+        <div class="system-popup-body">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="font-size: 17px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; color: var(--text-dark);">
+                    <i class="fa-solid fa-cloud" style="color: var(--primary);"></i> ตั้งค่า Google Apps Script API
+                </h3>
+                <button onclick="closeApiConfigModal()" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                นำ URL ที่ได้จากการ Deploy เป็น Web App ของ Google Apps Script มาวางที่นี่เพื่อเชื่อมต่อระบบฐานข้อมูล Google Sheets และ Google Drive จริง
+            </p>
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-dark);">Google Apps Script Web App URL:</label>
+                <input type="url" id="modalApiUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; box-sizing: border-box;">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="google-apps-script/README.md" target="_blank" style="font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 600;">
+                    <i class="fa-solid fa-book-open"></i> คู่มือสร้าง API
+                </a>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="saveApiUrlFromModal()" class="btn" style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">บันทึกและเชื่อมต่อ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+
+<script>
+    // Global Portal State
+    let portalData = {
+        settings: {},
+        categories: [],
+        apps: [],
+        news: [],
+        calendar: []
+    };
+    let activeCategory = 'all';
+    let currentSlideIndex = 0;
+    let slideInterval = null;
+    let html5QrcodeScanner = null;
+
+    // หมวดหมู่ไอคอนและสีตกแต่ง
+    const CATEGORY_MAP = {
+        'ทั่วไป': { icon: 'fa-solid fa-globe', color: '#e0f2fe', text: '#0369a1' },
+        'บริการภายใน': { icon: 'fa-solid fa-building-user', color: '#dcfce7', text: '#15803d' },
+        'บริการภายนอก': { icon: 'fa-solid fa-handshake', color: '#fef9c3', text: '#a16207' },
+        'ระบบสารสนเทศ': { icon: 'fa-solid fa-laptop-code', color: '#f3e8ff', text: '#7e22ce' }
+    };
+
+    const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+    // ------------------------------------------------------------------------
+    // 1. INITIALIZATION & DATA LOADING
+    // ------------------------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', async () => {
+        applyTheme();
+        updateApiStatusBadge();
+        document.getElementById('footerYear').textContent = API.formatThaiYear();
+
+        await reloadPortalData(false);
+
+        // จัดการ URL Parameters เช่น ?scan=true
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('scan') === 'true') {
+            openQrScanner();
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // ค้นหาแบบ Real-time
+        setupSearchListeners();
+    });
+
+    async function reloadPortalData(forceRefresh = false) {
+        if (forceRefresh) {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+        }
+
+        try {
+            const data = await API.getInitialData(forceRefresh);
+            if (data) {
+                portalData = data;
+                renderPortal();
+            }
+        } catch (error) {
+            console.error("Error loading portal data:", error);
+            API.toast("ไม่สามารถโหลดข้อมูลล่าสุดได้ กำลังใช้ข้อมูลจากแคช", "warning");
+        } finally {
+            const skeleton = document.getElementById('skeletonLoader');
+            const real = document.getElementById('realContent');
+            if (skeleton) skeleton.style.display = 'none';
+            if (real) real.style.display = 'block';
+
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+
+            if (forceRefresh) {
+                API.toast("อัปเดตข้อมูลล่าสุดเรียบร้อยแล้ว", "success");
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 2. RENDER PORTAL COMPONENTS
+    // ------------------------------------------------------------------------
+    function renderPortal() {
+        const s = portalData.settings || {};
+        const systemName = s.system_name || 'ศูนย์รวมบริการดิจิทัล';
+        const systemIcon = s.system_icon || '';
+        const systemFooter = s.system_footer || 'พัฒนาด้วยความใส่ใจ • รวดเร็ว ปลอดภัย และเสถียร';
+
+        // Title & Logo
+        document.getElementById('pageTitle').innerText = systemName;
+        document.getElementById('headerSystemName').innerText = systemName;
+        document.getElementById('sideCardTitle').innerText = systemName;
+        document.getElementById('footerSystemName').innerText = systemName;
+        document.getElementById('footerCopyName').innerText = systemName;
+        document.getElementById('footerTextDesc').innerText = systemFooter;
+
+        // Header Logo
+        const headerLogo = document.getElementById('headerLogoContainer');
+        const footerLogo = document.getElementById('footerLogoContainer');
+        if (systemIcon) {
+            headerLogo.innerHTML = `<img src="${escapeHtml(systemIcon)}" alt="Logo" class="header-logo-img">`;
+            footerLogo.innerHTML = `<img src="${escapeHtml(systemIcon)}" alt="Logo" style="width: 36px; height: 36px; object-fit: contain;">`;
+            document.getElementById('dynamicFavicon').href = systemIcon;
+            document.getElementById('dynamicAppleIcon').href = systemIcon;
+        } else {
+            headerLogo.innerHTML = `<img src="assets/uploads/system_logo.png" alt="Logo" class="header-logo-img" onerror="this.outerHTML='<i class=\\'fa-solid fa-graduation-cap fallback-logo-icon\\'></i>'">`;
+            footerLogo.innerHTML = `<img src="assets/uploads/system_logo.png" alt="Logo" style="width: 36px; height: 36px; object-fit: contain;" onerror="this.outerHTML='<i class=\\'fa-solid fa-graduation-cap\\' style=\\'font-size: 24px; color: var(--primary);\\'></i>'">`;
+        }
+
+        // Marquee Banner
+        renderMarquee(s);
+
+        // Welcome Popup
+        checkAndShowWelcomePopup(s);
+
+        // Image Slider
+        renderSlider(portalData.news || []);
+
+        // Categories
+        renderCategories(portalData.categories || []);
+
+        // New Apps
+        renderNewApps(portalData.apps || []);
+
+        // Favorite Apps
+        updateFavoritesUI();
+
+        // Calendar Widget
+        renderCalendarWidget(portalData.calendar || []);
+
+        // News Tab
+        renderNewsTab(portalData.news || []);
+
+        // All Services Tab
+        renderAllServices(portalData.apps || []);
+
+        // Update See All count
+        const btnSeeAll = document.getElementById('btnSeeAllCount');
+        if (btnSeeAll) {
+            btnSeeAll.innerHTML = `<i class="fa-solid fa-list-check"></i> ดูบริการทั้งหมด (${(portalData.apps || []).length} รายการ)`;
+        }
+    }
+
+    // Marquee Render
+    function renderMarquee(settings) {
+        const container = document.getElementById('marqueeBannerContainer');
+        if (settings.marquee_enabled === '1' && settings.marquee_text) {
+            const colorClass = 'marquee-' + (settings.marquee_color || 'danger');
+            container.className = `marquee-banner ${colorClass}`;
+            container.innerHTML = `
+                <div class="marquee-icon-box"><i class="fa-solid fa-bullhorn"></i></div>
+                <marquee scrollamount="5" behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();">
+                    ${escapeHtml(settings.marquee_text)}
+                </marquee>
+            `;
+            container.style.display = 'flex';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    // Welcome Popup
+    function checkAndShowWelcomePopup(settings) {
+        if (settings.popup_enabled === '1' && !sessionStorage.getItem('welcome_popup_shown')) {
+            const modal = document.getElementById('systemWelcomePopup');
+            document.getElementById('systemPopupTitle').innerText = settings.popup_title || 'ประกาศสำคัญ';
+            document.getElementById('systemPopupText').innerHTML = settings.popup_content || '';
+            
+            const img = document.getElementById('systemPopupImg');
+            if (settings.popup_image) {
+                img.src = settings.popup_image;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+
+            const linkBtn = document.getElementById('systemPopupLinkBtn');
+            if (settings.popup_link) {
+                linkBtn.href = settings.popup_link;
+                linkBtn.style.display = 'inline-flex';
+            } else {
+                linkBtn.style.display = 'none';
+            }
+
+            modal.style.display = 'flex';
+            sessionStorage.setItem('welcome_popup_shown', 'true');
+        }
+    }
+
+    function closeWelcomePopup() {
+        document.getElementById('systemWelcomePopup').style.display = 'none';
+    }
+
+    // Image Slider
+    function renderSlider(newsList) {
+        const wrapper = document.getElementById('sliderWrapper');
+        const dotsContainer = document.getElementById('sliderDots');
+        wrapper.innerHTML = '';
+        dotsContainer.innerHTML = '';
+
+        let slides = newsList.filter(n => n.image);
+        if (slides.length === 0) {
+            slides = [
+                {
+                    title: 'ยินดีต้อนรับสู่ศูนย์รวมบริการดิจิทัล',
+                    content: 'ศูนย์รวมบริการสำคัญของหน่วยงาน สะดวก รวดเร็ว เข้าใช้งานได้ 24 ชั่วโมง',
+                    image: '',
+                    id: 0
+                },
+                {
+                    title: 'เพิ่มทางลัดลงบนหน้าจอหลัก (PWA)',
+                    content: 'เข้าใช้งานได้สะดวกขึ้นโดยการเพิ่มทางลัดลงเดสก์ท็อปหรือหน้าจอมือถือของคุณ',
+                    image: '',
+                    id: 0
+                }
+            ];
+        }
+
+        slides.forEach((slide, idx) => {
+            const hasImg = !!slide.image;
+            const bgGrad = idx % 2 === 0 ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+            const slideItem = document.createElement('div');
+            slideItem.className = 'slide-item';
+            slideItem.style.cursor = 'pointer';
+            slideItem.onclick = () => openNewsItemModal(slide);
+
+            slideItem.innerHTML = `
+                ${hasImg 
+                    ? `<img src="${escapeHtml(slide.image)}" alt="">`
+                    : `<div style="width: 100%; height: 100%; background: ${bgGrad}; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: left; position: relative;">
+                         <i class="fa-solid fa-bullhorn" style="font-size: 50px; opacity: 0.15; position: absolute; right: 20px; bottom: 20px;"></i>
+                       </div>`
+                }
+                <div class="slide-caption">
+                    <div class="slide-title">${escapeHtml(slide.title)}</div>
+                    <div class="slide-desc">${escapeHtml(stripTags(slide.content || ''))}</div>
+                </div>
+            `;
+            wrapper.appendChild(slideItem);
+
+            const dot = document.createElement('span');
+            dot.className = `slider-dot ${idx === 0 ? 'active' : ''}`;
+            dot.onclick = () => showSlide(idx);
+            dotsContainer.appendChild(dot);
+        });
+
+        // Initialize Carousel Auto Slide
+        if (slideInterval) clearInterval(slideInterval);
+        currentSlideIndex = 0;
+        showSlide(0);
+        if (slides.length > 1) {
+            slideInterval = setInterval(() => {
+                showSlide((currentSlideIndex + 1) % slides.length);
+            }, 4500);
+        }
+    }
+
+    function showSlide(index) {
+        const slides = document.querySelectorAll('.slide-item');
+        const dots = document.querySelectorAll('.slider-dot');
+        const wrapper = document.getElementById('sliderWrapper');
+        if (slides.length === 0) return;
+
+        currentSlideIndex = index;
+        if (wrapper) {
+            wrapper.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+        }
+        dots.forEach((dot, idx) => {
+            dot.classList.toggle('active', idx === currentSlideIndex);
+        });
+    }
+
+    // Categories
+    function renderCategories(categories) {
+        const grid = document.getElementById('homeCategoriesGrid');
+        const pillsWrapper = document.getElementById('categoryPillsWrapper');
+        grid.innerHTML = '';
+        pillsWrapper.innerHTML = '<button class="category-pill active" onclick="filterCategory(\'all\', this)">ทั้งหมด</button>';
+
+        categories.forEach(cat => {
+            const catName = typeof cat === 'string' ? cat : cat.name;
+            const style = CATEGORY_MAP[catName] || { icon: 'fa-solid fa-cubes', color: '#f1f5f9', text: '#475569' };
+
+            // Home Grid Item
+            const catItem = document.createElement('div');
+            catItem.className = 'category-item';
+            catItem.onclick = () => selectCategoryFromHome(catName);
+            catItem.innerHTML = `
+                <div class="category-icon-box" style="background-color: ${style.color}; color: ${style.text};">
+                    <i class="${style.icon}"></i>
+                </div>
+                <div class="category-item-name">${escapeHtml(catName)}</div>
+            `;
+            grid.appendChild(catItem);
+
+            // Services Pill
+            const pill = document.createElement('button');
+            pill.className = 'category-pill';
+            pill.textContent = catName;
+            pill.onclick = function() { filterCategory(catName, this); };
+            pillsWrapper.appendChild(pill);
+        });
+    }
+
+    // New Apps
+    function renderNewApps(apps) {
+        const grid = document.getElementById('newAppsGrid');
+        grid.innerHTML = '';
+        const newApps = apps.slice(0, 8);
+
+        if (newApps.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #9ca3af; padding: 20px;">ยังไม่มีบริการในระบบ</div>';
+            return;
+        }
+
+        newApps.forEach(app => {
+            grid.appendChild(createAppCard(app));
+        });
+    }
+
+    // All Services Grid
+    function renderAllServices(apps) {
+        const grid = document.getElementById('allAppsGrid');
+        grid.innerHTML = '';
+
+        if (apps.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #9ca3af; padding: 40px;">ยังไม่มีบริการในระบบ</div>';
+            return;
+        }
+
+        apps.forEach(app => {
+            grid.appendChild(createAppCard(app, true));
+        });
+    }
+
+    // Helper: Create App Card Element
+    function createAppCard(app, isSearchable = false) {
+        const card = document.createElement('div');
+        card.className = 'app-item' + (isSearchable ? ' app-card-search' : '');
+        if (isSearchable) {
+            card.setAttribute('data-name', (app.name || '').toLowerCase());
+            card.setAttribute('data-category', app.category || 'ทั่วไป');
+        }
+
+        const firstChar = (app.name || '').substring(0, 1);
+        const iconHtml = app.icon
+            ? `<img src="${escapeHtml(app.icon)}" alt="" onerror="this.outerHTML='<div class=\\'app-icon-fallback\\'>${escapeHtml(firstChar)}</div>'">`
+            : `<div class="app-icon-fallback">${escapeHtml(firstChar)}</div>`;
+
+        const openTarget = (app.open_mode === 'iframe') ? '_self' : '_blank';
+
+        card.innerHTML = `
+            <a href="${escapeHtml(app.url || '#')}" target="${openTarget}" style="text-decoration:none; color:inherit;" onclick="handleAppClick(event, ${JSON.stringify(app).replace(/"/g, '&quot;')})">
+                <div class="app-icon-container" style="position: relative; display: inline-block;">
+                    <div class="app-icon-wrapper">
+                        ${iconHtml}
+                    </div>
+                    <button class="btn-favorite-toggle" data-app-id="${app.id}" onclick="toggleFavorite(${app.id}, event)" title="บันทึกเป็นบริการโปรด">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                </div>
+                <div class="app-name">${escapeHtml(app.name)}</div>
+            </a>
+        `;
+        return card;
+    }
+
+    function handleAppClick(event, app) {
+        if (app.open_mode === 'iframe') {
+            // สามารถเปิดในโหมดฝัง หรือเปิดในแท็บใหม่หากมีข้อจำกัดด้านความปลอดภัย
+        }
+    }
+
+    // Calendar Widget (Home)
+    function renderCalendarWidget(events) {
+        const list = document.getElementById('homeCalendarList');
+        list.innerHTML = '';
+
+        // กรองเฉพาะกิจกรรมตั้งแต่วันนี้เป็นต้นไป (ไม่แสดงวันที่ผ่านไปแล้ว)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const upcomingEvents = (events || []).filter(event => {
+            if (!event.event_date) return false;
+            const dateStr = String(event.event_date).split('T')[0];
+            const parts = dateStr.split('-');
+            let eventDate;
+            if (parts.length === 3) {
+                eventDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            } else {
+                eventDate = new Date(event.event_date);
+            }
+            if (isNaN(eventDate.getTime())) return false;
+            eventDate.setHours(0, 0, 0, 0);
+            return eventDate >= today;
+        }).sort((a, b) => {
+            const dateA = new Date(a.event_date);
+            const dateB = new Date(b.event_date);
+            return (isNaN(dateA.getTime()) ? 0 : dateA.getTime()) - (isNaN(dateB.getTime()) ? 0 : dateB.getTime());
+        });
+
+        if (upcomingEvents.length === 0) {
+            list.innerHTML = `
+                <div style="text-align: center; color: #9ca3af; padding: 25px 0;">
+                    <i class="fa-regular fa-calendar-xmark" style="font-size: 28px; margin-bottom: 6px; display: block;"></i>
+                    ไม่มีกิจกรรมที่กำลังจะมาถึงในขณะนี้
+                </div>
+            `;
+            return;
+        }
+
+        upcomingEvents.slice(0, 5).forEach(event => {
+            const dateStr = String(event.event_date).split('T')[0];
+            const parts = dateStr.split('-');
+            let dateObj;
+            if (parts.length === 3) {
+                dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            } else {
+                dateObj = new Date(event.event_date);
+            }
+
+            const day = !isNaN(dateObj.getDate()) ? String(dateObj.getDate()).padStart(2, '0') : '--';
+            const monthIndex = !isNaN(dateObj.getMonth()) ? dateObj.getMonth() : 0;
+            const monthTh = THAI_MONTHS[monthIndex] || '';
+
+            const item = document.createElement('div');
+            item.className = 'calendar-event-card';
+            item.innerHTML = `
+                <div class="calendar-date-badge">
+                    <span class="badge-month">${monthTh}</span>
+                    <span class="badge-day">${day}</span>
+                </div>
+                <div class="calendar-event-details">
+                    <div class="calendar-event-title">${escapeHtml(event.event_title)}</div>
+                    ${event.event_time ? `<div class="calendar-event-time"><i class="fa-regular fa-clock" style="margin-right: 4px;"></i> ${escapeHtml(event.event_time)}</div>` : ''}
+                    ${event.description ? `<div class="calendar-event-desc">${escapeHtml(event.description)}</div>` : ''}
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    // News Tab
+    function renderNewsTab(newsList) {
+        const container = document.getElementById('newsCardsContainer');
+        container.innerHTML = '';
+
+        if (!newsList || newsList.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; color: #9ca3af; padding: 40px 0; background: var(--surface); border-radius: 16px;">
+                    <i class="fa-regular fa-newspaper" style="font-size: 40px; margin-bottom: 12px; display: block;"></i>
+                    ยังไม่มีข่าวสารใหม่ในขณะนี้
+                </div>
+            `;
+            return;
+        }
+
+        newsList.forEach(news => {
+            const card = document.createElement('div');
+            card.className = 'news-card';
+            card.style.cursor = 'pointer';
+            card.onclick = () => openNewsItemModal(news);
+
+            let dateStr = API.formatThaiDate(news.created_at);
+
+            card.innerHTML = `
+                ${news.image ? `<img src="${escapeHtml(news.image)}" alt="" class="news-card-image">` : ''}
+                <div class="news-card-body">
+                    ${dateStr && dateStr !== '-' ? `<div class="news-card-date"><i class="fa-regular fa-calendar"></i> ${dateStr}</div>` : ''}
+                    <h3 class="news-card-title" style="margin-top: 4px;">${escapeHtml(news.title)}</h3>
+                    <p class="news-card-desc">${escapeHtml(stripTags(news.content || ''))}</p>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ------------------------------------------------------------------------
+    // 3. FAVORITES SYSTEM (LocalStorage)
+    // ------------------------------------------------------------------------
+    function getFavorites() {
+        try {
+            const favs = localStorage.getItem('user_favorites');
+            return favs ? JSON.parse(favs) : [];
+        } catch(e) {
+            return [];
+        }
+    }
+
+    function saveFavorites(favs) {
+        localStorage.setItem('user_favorites', JSON.stringify(favs));
+    }
+
+    window.toggleFavorite = function(appId, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        let favs = getFavorites();
+        const idStr = String(appId);
+        const index = favs.indexOf(idStr);
+        if (index > -1) {
+            favs.splice(index, 1);
+            API.toast("นำออกจากบริการโปรดแล้ว", "info", 2000);
+        } else {
+            favs.push(idStr);
+            API.toast("เพิ่มเข้ารายการบริการโปรดแล้ว ❤️", "success", 2000);
+        }
+        saveFavorites(favs);
+        updateFavoritesUI();
+    };
+
+    function updateFavoritesUI() {
+        const favs = getFavorites();
+        const allApps = portalData.apps || [];
+
+        // อัปเดตไอคอนหัวใจในการ์ดทั้งหมด
+        document.querySelectorAll('.btn-favorite-toggle').forEach(btn => {
+            const appId = btn.getAttribute('data-app-id');
+            const heartIcon = btn.querySelector('i');
+            if (favs.includes(String(appId))) {
+                heartIcon.className = 'fa-solid fa-heart';
+                btn.classList.add('is-fav');
+            } else {
+                heartIcon.className = 'fa-regular fa-heart';
+                btn.classList.remove('is-fav');
+            }
+        });
+
+        // อัปเดตในส่วน Favorites Grid
+        const favGrid = document.getElementById('favoriteAppsGrid');
+        if (favGrid) {
+            favGrid.innerHTML = '';
+            const favApps = allApps.filter(app => favs.includes(String(app.id)));
+
+            if (favApps.length > 0) {
+                favApps.forEach(app => {
+                    favGrid.appendChild(createAppCard(app));
+                });
+            } else {
+                favGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: #9ca3af; padding: 25px 0; font-size: 12px; width: 100%;">
+                        <i class="fa-regular fa-heart" style="font-size: 24px; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>
+                        กดรูปหัวใจบนบริการที่ใช้งานบ่อย เพื่อจัดเก็บเป็นบริการโปรดของคุณ
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // 4. SEARCH & CATEGORY FILTER
+    // ------------------------------------------------------------------------
+    function setupSearchListeners() {
+        const searchInput = document.getElementById('searchInput');
+        const searchInputServices = document.getElementById('searchInputServices');
+
+        function doSearch(query) {
+            query = query.trim().toLowerCase();
+            const cards = document.querySelectorAll('.app-card-search');
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name') || '';
+                const cat = card.getAttribute('data-category') || '';
+                const matchesQuery = name.includes(query);
+                const matchesCat = (activeCategory === 'all' || cat === activeCategory);
+
+                card.style.display = (matchesQuery && matchesCat) ? 'flex' : 'none';
+            });
+        }
+
+        if (searchInputServices) {
+            searchInputServices.addEventListener('input', (e) => doSearch(e.target.value));
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const val = e.target.value;
+                    switchTab('services');
+                    if (searchInputServices) {
+                        searchInputServices.value = val;
+                        filterCategory('all');
+                        doSearch(val);
+                    }
+                }
+            });
+        }
+    }
+
+    window.filterCategory = function(category, element) {
+        activeCategory = category;
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            pill.classList.toggle('active', pill.textContent.trim() === category || (category === 'all' && pill.textContent.trim() === 'ทั้งหมด'));
+        });
+
+        const searchInputServices = document.getElementById('searchInputServices');
+        const query = searchInputServices ? searchInputServices.value.trim().toLowerCase() : '';
+        const cards = document.querySelectorAll('.app-card-search');
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name') || '';
+            const cat = card.getAttribute('data-category') || '';
+            const matchesQuery = name.includes(query);
+            const matchesCat = (activeCategory === 'all' || cat === activeCategory);
+            card.style.display = (matchesQuery && matchesCat) ? 'flex' : 'none';
+        });
+    };
+
+    function selectCategoryFromHome(category) {
+        switchTab('services');
+        setTimeout(() => {
+            const pills = document.querySelectorAll('.category-pill');
+            let found = false;
+            pills.forEach(pill => {
+                if (pill.textContent.trim() === category) {
+                    filterCategory(category, pill);
+                    found = true;
+                }
+            });
+            if (!found) filterCategory('all');
+        }, 100);
+    }
+
+    // ------------------------------------------------------------------------
+    // 5. TAB SWITCHING
+    // ------------------------------------------------------------------------
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.desktop-nav-link').forEach(el => el.classList.remove('active'));
+
+        const targetTab = document.getElementById('tab-' + tabId);
+        if (targetTab) targetTab.classList.add('active');
+
+        const navItem = document.getElementById('nav-' + tabId);
+        if (navItem) navItem.classList.add('active');
+
+        const desktopNav = document.getElementById('desktop-nav-' + tabId);
+        if (desktopNav) desktopNav.classList.add('active');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ------------------------------------------------------------------------
+    // 6. NEWS MODAL
+    // ------------------------------------------------------------------------
+    function openNewsItemModal(news) {
+        document.getElementById('modalNewsTitle').innerText = news.title || '';
+        
+        let dateStr = API.formatThaiDateFull(news.created_at, true);
+        
+        const dateEl = document.getElementById('modalNewsDate');
+        if (dateStr && dateStr !== '-') {
+            dateEl.innerHTML = `<i class="fa-regular fa-calendar" style="margin-right: 4px;"></i> ${dateStr}`;
+            dateEl.style.display = 'flex';
+        } else {
+            dateEl.style.display = 'none';
+        }
+
+        const imgEl = document.getElementById('modalNewsImage');
+        if (news.image) {
+            imgEl.src = news.image;
+            imgEl.style.display = 'block';
+        } else {
+            imgEl.style.display = 'none';
+        }
+
+        document.getElementById('modalNewsContent').innerHTML = news.content || '';
+        document.getElementById('newsDetailModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeNewsModal() {
+        document.getElementById('newsDetailModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('newsDetailModal')) closeNewsModal();
+        if (e.target === document.getElementById('apiConfigModal')) closeApiConfigModal();
+    });
+
+    // ------------------------------------------------------------------------
+    // 7. QR CODE SCANNER (CAMERA)
+    // ------------------------------------------------------------------------
+    window.openQrScanner = function() {
+        const qrModal = document.getElementById('qrScannerModal');
+        if (qrModal) qrModal.style.display = 'flex';
+
+        setTimeout(() => {
+            try {
+                if (!html5QrcodeScanner) {
+                    html5QrcodeScanner = new Html5Qrcode("qr-reader");
+                }
+                const qrSuccessCallback = (decodedText) => {
+                    closeQrScanner();
+                    if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
+                        window.open(decodedText, '_blank');
+                    } else {
+                        alert(`ข้อมูลที่สแกนได้: ${decodedText}`);
+                    }
+                };
+                html5QrcodeScanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 220, height: 220 } },
+                    qrSuccessCallback
+                ).catch(err => {
+                    console.error("Camera Error:", err);
+                    API.toast("ไม่สามารถเปิดกล้องได้ กรุณาตรวจสอบสิทธิ์การเข้าถึงกล้อง", "error");
+                    closeQrScanner();
+                });
+            } catch (e) {
+                console.error("QR Reader Error:", e);
+                closeQrScanner();
+            }
+        }, 300);
+    };
+
+    window.closeQrScanner = function() {
+        const qrModal = document.getElementById('qrScannerModal');
+        if (qrModal) qrModal.style.display = 'none';
+        if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+            html5QrcodeScanner.stop().catch(err => console.error(err));
+        }
+    };
+
+    // ------------------------------------------------------------------------
+    // 8. THEME & API CONFIG MODAL
+    // ------------------------------------------------------------------------
+    function applyTheme() {
+        const theme = localStorage.getItem('theme') || 'light';
+        const icon = document.querySelector('.btn-theme-toggle i');
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            if (icon) icon.className = 'fa-regular fa-sun';
+        } else {
+            document.documentElement.classList.remove('dark-theme');
+            if (icon) icon.className = 'fa-regular fa-moon';
+        }
+    }
+
+    window.toggleTheme = function() {
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', nextTheme);
+        applyTheme();
+    };
+
+    function updateApiStatusBadge() {
+        const apiUrl = CONFIG.getApiUrl();
+        const btn = document.getElementById('apiStatusBtn');
+        const text = document.getElementById('apiStatusText');
+        if (btn && text) {
+            if (apiUrl) {
+                btn.className = 'api-config-badge connected';
+                text.innerText = 'Connected';
+            } else {
+                btn.className = 'api-config-badge fallback';
+                text.innerText = 'Demo/Setup';
+            }
+        }
+    }
+
+    window.openApiConfigModal = function() {
+        document.getElementById('modalApiUrlInput').value = CONFIG.getApiUrl();
+        document.getElementById('apiConfigModal').style.display = 'flex';
+    };
+
+    window.closeApiConfigModal = function() {
+        document.getElementById('apiConfigModal').style.display = 'none';
+    };
+
+    window.saveApiUrlFromModal = function() {
+        const url = document.getElementById('modalApiUrlInput').value.trim();
+        CONFIG.setApiUrl(url);
+        updateApiStatusBadge();
+        closeApiConfigModal();
+        API.toast("บันทึกการตั้งค่า API เรียบร้อย กำลังรีเฟรชข้อมูล...", "success");
+        reloadPortalData(true);
+    };
+
+    // ------------------------------------------------------------------------
+    // 9. PWA INSTALLATION & SERVICE WORKER
+    // ------------------------------------------------------------------------
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const banner = document.getElementById('pwaInstallBanner');
+        if (banner && sessionStorage.getItem('pwa_banner_dismissed') !== 'true') {
+            banner.style.display = 'flex';
+        }
+    });
+
+    const btnPwa = document.getElementById('btnPwaInstall');
+    if (btnPwa) {
+        btnPwa.addEventListener('click', () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(() => {
+                document.getElementById('pwaInstallBanner').style.display = 'none';
+                deferredPrompt = null;
+            });
+        });
+    }
+
+    function dismissPwaBanner() {
+        document.getElementById('pwaInstallBanner').style.display = 'none';
+        sessionStorage.setItem('pwa_banner_dismissed', 'true');
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('assets/js/sw.js').catch(err => console.log('SW registration failed', err));
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function stripTags(html) {
+        const tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    }
+</script>
+
+</body>
+</html>

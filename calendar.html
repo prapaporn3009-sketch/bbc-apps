@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="calendarPageTitle">ปฏิทินวิชาการและกิจกรรม</title>
+    
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <link rel="icon" id="dynamicFavicon" href="assets/uploads/system_logo.png">
+    <link rel="apple-touch-icon" id="dynamicAppleIcon" href="assets/uploads/system_logo.png">
+    <link rel="manifest" href="assets/manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+
+    <style>
+        .calendar-page-wrapper {
+            background-color: var(--background-inner);
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .calendar-page-wrapper {
+                max-width: 800px;
+                margin: 0 auto;
+                box-shadow: 0 0 40px rgba(15, 23, 42, 0.08);
+                border-left: 1px solid var(--border);
+                border-right: 1px solid var(--border);
+            }
+        }
+
+        .back-btn-header {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .back-btn-header:hover {
+            color: var(--primary);
+            background-color: var(--primary-light);
+            transform: scale(1.05);
+        }
+
+        .month-group-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 28px 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .empty-calendar-search {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 20px;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid var(--border);
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calendar-page-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-top-bar">
+            <a href="index.html" class="back-btn-header" title="กลับหน้าหลัก">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            
+            <div class="branding-text" style="flex: 1; min-width: 0; margin-left: 8px;">
+                <span class="header-welcome-text" id="calendarSubTitle">กำหนดการและกิจกรรม</span>
+                <h1 class="header-title-text" style="font-size: 18px;">ปฏิทินวิชาการทั้งหมด</h1>
+            </div>
+
+            <button class="btn-theme-toggle" onclick="toggleTheme()" title="สลับโหมด มืด/สว่าง">
+                <i class="fa-regular fa-moon"></i>
+            </button>
+        </div>
+
+        <div style="margin-top: 10px; width: 100%;">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="calendarSearchInput" class="search-input" placeholder="ค้นหากิจกรรม หรือ วันที่...">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" style="padding: 16px 20px 40px;">
+        <!-- Skeleton Loader -->
+        <div id="calendarSkeleton" class="skeleton-container">
+            <div class="skeleton" style="width: 150px; height: 20px; margin-bottom: 16px;"></div>
+            <div class="skeleton" style="height: 80px; border-radius: 14px; margin-bottom: 12px;"></div>
+            <div class="skeleton" style="height: 80px; border-radius: 14px; margin-bottom: 12px;"></div>
+            <div class="skeleton" style="width: 150px; height: 20px; margin: 24px 0 16px;"></div>
+            <div class="skeleton" style="height: 80px; border-radius: 14px; margin-bottom: 12px;"></div>
+        </div>
+
+        <!-- Real Events Container -->
+        <div id="calendarEventsContainer" style="display: none;"></div>
+
+        <!-- Empty Search Result Notice -->
+        <div id="emptySearchNotice" class="empty-calendar-search">
+            <i class="fa-regular fa-calendar-xmark" style="font-size: 36px; margin-bottom: 10px; display: block; color: #cbd5e1;"></i>
+            <div style="font-weight: 600; font-size: 14px;">ไม่พบกิจกรรมที่ค้นหา</div>
+            <div style="font-size: 12px; margin-top: 4px;">ลองเปลี่ยนคำค้นหาใหม่อีกครั้ง</div>
+        </div>
+    </main>
+</div>
+
+<!-- Scripts -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+
+<script>
+    let calendarEvents = [];
+    const THAI_FULL_MONTHS = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const THAI_SHORT_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        applyTheme();
+        
+        try {
+            const data = await API.getInitialData();
+            if (data) {
+                const s = data.settings || {};
+                if (s.system_name) {
+                    document.getElementById('calendarPageTitle').innerText = `ปฏิทินวิชาการ - ${s.system_name}`;
+                    document.getElementById('calendarSubTitle').innerText = s.system_name;
+                }
+                if (s.system_icon) {
+                    document.getElementById('dynamicFavicon').href = s.system_icon;
+                    document.getElementById('dynamicAppleIcon').href = s.system_icon;
+                }
+                calendarEvents = data.calendar || [];
+                renderGroupedCalendar(calendarEvents);
+            }
+        } catch (error) {
+            console.error("Calendar Load Error:", error);
+            API.toast("ไม่สามารถโหลดข้อมูลปฏิทินได้", "error");
+        } finally {
+            document.getElementById('calendarSkeleton').style.display = 'none';
+            document.getElementById('calendarEventsContainer').style.display = 'block';
+        }
+
+        // Live Search
+        const searchInput = document.getElementById('calendarSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => filterCalendarEvents(e.target.value));
+        }
+    });
+
+    function renderGroupedCalendar(events) {
+        const container = document.getElementById('calendarEventsContainer');
+        container.innerHTML = '';
+
+        if (!events || events.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; color: #9ca3af; padding: 50px 20px; background: var(--surface); border-radius: 16px; border: 1px solid var(--border);">
+                    <i class="fa-regular fa-calendar-xmark" style="font-size: 40px; margin-bottom: 12px; display: block;"></i>
+                    <div style="font-size: 15px; font-weight: 700;">ยังไม่มีกิจกรรมในปฏิทินวิชาการ</div>
+                </div>
+            `;
+            return;
+        }
+
+        // เรียงลำดับตามวันที่จากน้อยไปมาก
+        events.sort((a, b) => new Date(a.event_date || 0) - new Date(b.event_date || 0));
+
+        // จัดกลุ่มตาม ปี-เดือน (YYYY-MM)
+        const groups = {};
+        events.forEach(item => {
+            const d = new Date(item.event_date);
+            const key = !isNaN(d.getTime()) ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` : 'other';
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(item);
+        });
+
+        for (let groupKey in groups) {
+            let monthTitleText = 'กิจกรรมอื่นๆ';
+            if (groupKey !== 'other') {
+                const [year, month] = groupKey.split('-');
+                const mIndex = parseInt(month, 10) - 1;
+                const thaiYear = parseInt(year, 10) + 543;
+                monthTitleText = `${THAI_FULL_MONTHS[mIndex]} ${thaiYear}`;
+            }
+
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'calendar-month-group';
+            groupDiv.innerHTML = `
+                <div class="month-group-title">
+                    <i class="fa-regular fa-calendar" style="color: var(--primary);"></i> ${monthTitleText}
+                </div>
+                <div class="calendar-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            `;
+
+            const listDiv = groupDiv.querySelector('.calendar-list');
+
+            groups[groupKey].forEach(event => {
+                const dateObj = new Date(event.event_date);
+                const day = !isNaN(dateObj.getDate()) ? String(dateObj.getDate()).padStart(2, '0') : '--';
+                const monthIndex = !isNaN(dateObj.getMonth()) ? dateObj.getMonth() : 0;
+                const monthTh = THAI_SHORT_MONTHS[monthIndex] || '';
+
+                const card = document.createElement('div');
+                card.className = 'calendar-event-card event-search-item';
+                card.setAttribute('data-search', `${(event.event_title || '')} ${(event.description || '')} ${event.event_date}`.toLowerCase());
+
+                card.innerHTML = `
+                    <div class="calendar-date-badge">
+                        <span class="badge-month">${monthTh}</span>
+                        <span class="badge-day">${day}</span>
+                    </div>
+                    <div class="calendar-event-details">
+                        <div class="calendar-event-title">${escapeHtml(event.event_title)}</div>
+                        ${event.event_time ? `<div class="calendar-event-time"><i class="fa-regular fa-clock" style="margin-right: 4px;"></i> ${escapeHtml(event.event_time)}</div>` : ''}
+                        ${event.description ? `<div class="calendar-event-desc" style="margin-top: 4px; line-height: 1.5;">${escapeHtml(event.description)}</div>` : ''}
+                    </div>
+                `;
+                listDiv.appendChild(card);
+            });
+
+            container.appendChild(groupDiv);
+        }
+    }
+
+    function filterCalendarEvents(query) {
+        query = query.trim().toLowerCase();
+        const items = document.querySelectorAll('.event-search-item');
+        const groups = document.querySelectorAll('.calendar-month-group');
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const dataText = item.getAttribute('data-search') || '';
+            if (dataText.includes(query)) {
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        groups.forEach(group => {
+            const visibleItems = group.querySelectorAll('.event-search-item[style*="display: flex"]');
+            group.style.display = (visibleItems.length > 0) ? 'block' : 'none';
+        });
+
+        const emptyNotice = document.getElementById('emptySearchNotice');
+        emptyNotice.style.display = (visibleCount === 0 && query !== '') ? 'block' : 'none';
+    }
+
+    function applyTheme() {
+        const theme = localStorage.getItem('theme') || 'light';
+        const icon = document.querySelector('.btn-theme-toggle i');
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            if (icon) icon.className = 'fa-regular fa-sun';
+        } else {
+            document.documentElement.classList.remove('dark-theme');
+            if (icon) icon.className = 'fa-regular fa-moon';
+        }
+    }
+
+    window.toggleTheme = function() {
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', nextTheme);
+        applyTheme();
+    };
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+</script>
+
+</body>
+</html>
