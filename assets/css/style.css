@@ -123,19 +123,18 @@ body {
     align-items: center;
     width: 100%;
     gap: 12px;
-    flex-wrap: nowrap; /* ห้ามตกบรรทัดเด็ดขาด เพื่อให้อยู่ในระดับเดียวกัน */
 }
 
 .header-branding {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex: 0 1 auto; /* ยืดหยุ่นหดตัวได้ */
-    min-width: 0; /* ปลดล็อก min-width เพื่อไม่ให้ดัน flex */
+    gap: 12px;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .logo-wrapper-header {
-    width: 44px; /* ปรับขนาดโลโก้ลงเล็กน้อยให้พอดีแถว */
+    width: 44px;
     height: 44px;
     border-radius: 12px;
     background-color: #ffffff;
@@ -152,7 +151,7 @@ body {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 5px;
+    padding: 4px;
 }
 
 .fallback-logo-icon {
@@ -164,33 +163,66 @@ body {
     display: flex;
     flex-direction: column;
     text-align: left;
-    min-width: 0; /* ป้องกันเนื้อหาดันกรอบกว้างเกินไป */
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
 .header-welcome-text {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    margin-bottom: 1px;
+    margin-bottom: 2px;
 }
 
 .header-title-text {
-    font-size: 16px; /* ปรับขนาดฟอนต์ของชื่อระบบให้อ่านง่ายแต่กระชับ */
+    font-size: 16px;
     font-weight: 800;
     color: var(--text-main);
-    line-height: 1.2;
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* ตัดทอนตัวอักษรหากยาวเกินขนาดหน้าจอ */
+    text-overflow: ellipsis;
 }
 
-/* Search Box Improvements */
-.search-box-wrapper {
-    flex: 1 1 auto; /* ขยายตามพื้นที่ว่างที่เหลือในแถว */
-    max-width: 240px; /* จำกัดความกว้างบนจอใหญ่ */
-    min-width: 140px; /* ยอมให้แคบลงได้บนมือถือ */
+@media (min-width: 768px) {
+    .header-title-text {
+        font-size: 18px;
+    }
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.btn-header-action {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background-color: var(--surface);
+    color: var(--text-main);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.btn-header-action:hover {
+    background-color: var(--border);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+/* Dedicated Search Row */
+.header-search-row {
+    width: 100%;
 }
 
 .search-box {
@@ -200,25 +232,27 @@ body {
 
 .search-input {
     width: 100%;
-    padding: 10px 12px 10px 38px; /* ปรับลดระยะช่องว่างเล็กน้อย */
-    border: none;
-    border-radius: 12px; /* โค้งมนสวยงามกระชับ */
-    background-color: #f1f5f9;
-    font-size: 12px; /* ปรับขนาดฟอนต์ในช่องค้นหาให้กระชับขึ้น */
+    padding: 10px 14px 10px 42px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background-color: var(--surface);
+    font-size: 13px;
     font-weight: 500;
     outline: none;
     color: var(--text-main);
     transition: all 0.25s ease;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
 .search-input:focus {
-    background-color: #ffffff;
-    box-shadow: 0 0 0 2px var(--primary), 0 8px 20px rgba(0,0,0,0.04);
+    background-color: var(--surface);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15), 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .search-input::placeholder {
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .search-icon {
@@ -226,8 +260,9 @@ body {
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 14px;
+    pointer-events: none;
 }
 
 /* Main Content Area */

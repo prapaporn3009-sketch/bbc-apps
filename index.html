@@ -48,10 +48,11 @@
 
     <!-- Main App Header -->
     <header class="app-header">
+        <!-- แถวที่ 1: โลโก้, ชื่อโรงเรียน/หน่วยงาน และปุ่มการทำงาน -->
         <div class="header-top-bar">
             <div class="header-branding">
                 <div class="logo-wrapper-header" id="headerLogoContainer">
-                    <i class="fa-solid fa-graduation-cap fallback-logo-icon"></i>
+                    <img src="assets/uploads/system_logo.png" alt="Logo" class="header-logo-img" onerror="this.outerHTML='<i class=\'fa-solid fa-graduation-cap fallback-logo-icon\'></i>'">
                 </div>
                 <div class="branding-text">
                     <span class="header-welcome-text">ยินดีต้อนรับ</span>
@@ -59,19 +60,21 @@
                 </div>
             </div>
             
-            <div style="display: flex; gap: 8px; align-items: center; flex-grow: 1; justify-content: flex-end; min-width: 0;">
-                <div class="search-box-wrapper">
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาบริการ...">
-                    </div>
-                </div>
-                <button class="btn-refresh-toggle" onclick="reloadPortalData(true)" title="รีเฟรชข้อมูลล่าสุด">
+            <div class="header-actions">
+                <button class="btn-header-action btn-refresh-toggle" onclick="reloadPortalData(true)" title="รีเฟรชข้อมูลล่าสุด">
                     <i class="fa-solid fa-rotate-right" id="refreshIcon"></i>
                 </button>
-                <button class="btn-theme-toggle" onclick="toggleTheme()" title="สลับโหมด มืด/สว่าง">
+                <button class="btn-header-action btn-theme-toggle" onclick="toggleTheme()" title="สลับโหมด มืด/สว่าง">
                     <i class="fa-regular fa-moon"></i>
                 </button>
+            </div>
+        </div>
+
+        <!-- แถวที่ 2: ช่องค้นหาบริการ (แยกแถวใหม่อิสระ ไม่เบียดชื่อโรงเรียน) -->
+        <div class="header-search-row">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาบริการหรือแอปพลิเคชัน...">
             </div>
         </div>
 

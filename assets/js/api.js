@@ -56,7 +56,8 @@ const API = {
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify(bodyData)
+        body: JSON.stringify(bodyData),
+        redirect: "follow"
       });
 
       if (!response.ok) {
@@ -64,6 +65,9 @@ const API = {
       }
 
       const result = await response.json();
+      if (result && result.status === 'error') {
+        throw new Error(result.message || "เกิดข้อผิดพลาดในการทำรายการ");
+      }
       return result;
     } catch (error) {
       console.error(`API POST [${action}] Error:`, error);
