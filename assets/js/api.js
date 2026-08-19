@@ -21,6 +21,8 @@ const API = {
     try {
       const response = await fetch(fullUrl, {
         method: "GET",
+        mode: "cors",
+        credentials: "omit",
         redirect: "follow"
       });
       if (!response.ok) {
@@ -53,6 +55,8 @@ const API = {
       // ส่งด้วย Content-Type text/plain เพื่อป้องกันปัญหา CORS Preflight ใน Web App ของ GAS
       const response = await fetch(apiUrl, {
         method: "POST",
+        mode: "cors",
+        credentials: "omit",
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
         },

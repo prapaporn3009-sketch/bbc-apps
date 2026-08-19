@@ -1386,7 +1386,7 @@
 
         API.showLoading("กำลังทดสอบการเชื่อมต่อ GAS API...");
         try {
-            const res = await fetch(`${url}?action=ping`, { method: "GET", redirect: "follow" });
+            const res = await fetch(`${url}?action=ping`, { method: "GET", mode: "cors", credentials: "omit", redirect: "follow" });
             const json = await res.json();
             if (json && json.status === 'success') {
                 CONFIG.setApiUrl(url);
