@@ -7,7 +7,7 @@
 
 const CONFIG = {
   // วาง URL ของ Google Apps Script Web App ที่ได้จากการ Deploy ที่นี่
-  // ตัวอย่าง: "https://script.google.com/macros/s/AKfycbxAE7Mg8_yzFHz17k-Zma6QZ6wKpExrKZnomzfjs8TJBUdmM_G3_erKFwk6P1Z1yLtDVA/exec"
+  // ตัวอย่าง: ""
   GAS_API_URL: "",
 
   // ฟังก์ชันดึง API URL (ตรวจสอบค่าที่บันทึกไว้ใน LocalStorage หรือใช้ค่าจากไฟล์นี้)
